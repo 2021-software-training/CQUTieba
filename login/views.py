@@ -19,7 +19,7 @@ def register(request):
             return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
         else:
             register_password = request.POST['password']
-            # register_email = request.POST['email']
+            # register_email = request.POST['email_sender']
             userinfo = {"username": register_username, "password": register_password}
             user = User.objects.create_user(**userinfo)
             user.save()

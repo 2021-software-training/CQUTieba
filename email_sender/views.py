@@ -2,10 +2,10 @@ from django.core.mail import BadHeaderError, send_mail
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
-from register.models import EmailVerifyRecord
+from email_sender.models import EmailVerifyRecord
 from email_send import random_str
 def main(request):
-    return HttpResponse("register")
+    return HttpResponse("email_sender")
 # Create your views here.
 def main1(request):
     return render(request,'reg_index.html')
