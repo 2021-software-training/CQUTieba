@@ -6,21 +6,31 @@ import json
 
 from login.token import check_token, create_token
 
+
 # Create your views here.
-
-
 def register(request):
-    if request.method == "POST":
-        register_username = request.POST['username']
-
-        # 获得用户名之后进行判断是否已经被注册
-        registrant = authenticate(username=register_username)
-        if registrant is not None:
+    print(1)
+    if request.method == "GET":
+        print(request.GET)
+        register_username = request.GET['username']
+        try:
+            # 用户名已经存在
+            User.objects.get(username=register_username)
             return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
-        else:
-            register_password = request.POST['password']
-            # register_email = request.POST['email']
-            userinfo = {"username": register_username, "password": register_password}
+        except User.DoesNotExist:
+            register_password = request.GET['password']
+            register_email = request.GET['email']
+            # register_age = request.GET['age']
+            # register_sex = request.GET['sex']
+
+            userinfo = {
+                "username": register_username,
+                "password": register_password,
+                "email": register_email,
+                # "age": register_age,
+                # "sex": register_sex
+            }
+
             user = User.objects.create_user(**userinfo)
             user.save()
             return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
@@ -34,15 +44,15 @@ def login(request):
 
         print("login_username: ", username, "\tlogin_password: ", password)
 
-        if not user_check(name=username, ps=password):
-            return HttpResponse(
-                json.dumps({"result": "no", "token": "none", "name": username, "password": password}),
-                content_type='application/json'
-            )
-        else:
+        if user_check(name=username, ps=password):
             token = create_token(username)
             return HttpResponse(
                 json.dumps({"result": "yes", "token": token}),
+                content_type='application/json'
+            )
+        else:
+            return HttpResponse(
+                json.dumps({"result": "no", "token": "none", "name": username, "password": password}),
                 content_type='application/json'
             )
     return HttpResponse("not post")
