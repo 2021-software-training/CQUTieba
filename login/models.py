@@ -5,9 +5,10 @@ from django.contrib.auth.models import User
 
 class MyUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user_id = models.PositiveIntegerField(primary_key=True)
     
-    age = models.PositiveSmallIntegerField(default=1)        # PositiveSmallIntegerField
-    gender = models.PositiveSmallIntegerField(default=3)
+    age = models.PositiveSmallIntegerField(default=0)
+    gender = models.PositiveSmallIntegerField(default=0)    # 1: 男性，2：女性，0：未设定
     photo_url = models.ImageField(blank=True)
 
     address_provinces = models.CharField(blank=True)
