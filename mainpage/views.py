@@ -1,3 +1,10 @@
+import sys
+import os
+import django
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(BASE_DIR)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CQUTieba.settings')
+django.setup()
 from django.shortcuts import render
 from mainpage.models import *
 from django.http import HttpResponse,HttpResponseRedirect
@@ -30,7 +37,7 @@ def add_comment(request):#第一次加入文章
             return HttpResponse(json.dumps({"result": "yes","commenter":commenter_id}))
         else:
             comment_target = Comment.objects.filter(article_id=article_id)#回复的
-            comment_target_name=comment_target.article_id  #查询id
+            comment_target_name=comment_target[0].article_id  #查询id
             comment_text+="\n"+"{0} 回复 {1}".format(commenter_id,comment_target_name)
             comment_this=Comment(
                 comment_text,commenter_id,article_id,
@@ -39,8 +46,5 @@ def add_comment(request):#第一次加入文章
             comment_this.save()  #加入到数据库当中去
             return HttpResponse(json.dumps({"result":"yes","commenter":commenter_id}))
     return HttpResponse(json.dumps({"result":"no"}))
-
-
-
 
 
