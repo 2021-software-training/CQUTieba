@@ -1,5 +1,5 @@
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from login.models import MyUser, NumCounter
 from django.http import HttpResponse
 from login.utils import user_check
 import json
@@ -15,24 +15,26 @@ def register(request):
         register_username = request.GET['username']
         try:
             # 用户名已经存在
-            User.objects.get(username=register_username)
+            MyUser.objects.get(user__username=register_username)
             return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
-        except User.DoesNotExist:
+        except MyUser.DoesNotExist:
             register_password = request.GET['password']
             register_email = request.GET['email']
-            # register_age = request.GET['age']
+            register_age = request.GET['age']
             # register_sex = request.GET['sex']
-
             userinfo = {
                 "username": register_username,
                 "password": register_password,
                 "email": register_email,
-                # "age": register_age,
-                # "sex": register_sex
             }
-
-            user = User.objects.create_user(**userinfo)
+            User.objects.create_user(**userinfo)
+            user = User.objects.get(username=register_username)
+            counter = NumCounter.objects.get(pk=1)
+            my_user = MyUser(user=user, age=register_age, my_user_id=counter.my_user_id)
+            counter.my_user_id += 1
             user.save()
+            my_user.save()
+            counter.save()
             return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "not json"}), content_type='application/json')
 

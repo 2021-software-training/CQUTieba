@@ -18,7 +18,6 @@ class MyUser(models.Model):
     habits2 = models.CharField(blank=True, max_length=10)
     habits3 = models.CharField(blank=True, max_length=10)
 
-    birthday = models.DateTimeField(blank=True)
     status = models.BooleanField(default=True)
     signature = models.CharField(default='还没有个性签名呢~', max_length=50)
     exp_value = models.PositiveIntegerField(default=1)
@@ -27,3 +26,9 @@ class MyUser(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class NumCounter(models.Model):
+    counter_id = models.IntegerField(primary_key=True)
+    my_user_id = models.PositiveIntegerField(default=100000)
+    my_article_id = models.PositiveIntegerField(default=1100000)
