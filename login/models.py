@@ -32,3 +32,6 @@ class NumCounter(models.Model):
     counter_id = models.IntegerField(primary_key=True)
     my_user_id = models.PositiveIntegerField(default=100000)
     my_article_id = models.PositiveIntegerField(default=1100000)
+
+    def __str__(self):
+        return str(self.counter_id)

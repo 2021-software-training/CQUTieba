@@ -1,31 +1,7 @@
 import json
 from django.http import HttpResponse
-from mainpage.models import Article, LikeList
+from mainpage.models import Article, LikeList, Comment
 from login.models import MyUser
-
-
-def add_article(request):
-    """
-    用于新增文章
-    :param request: {
-        articleID, authorId, articleText
-            articleAudio(默认先不管这个 默认这个为空) articleTitle
-                articleType1 articleType2 articleType3
-        }
-    :return: json形式的 {result: "yes"/"no"}
-    """
-    pass
-
-
-def add_comment(request):
-    """
-
-    :param request: {
-        commentText, commentID, articleID
-            commentAudio(先默认为空)
-        }
-    :return:
-    """
 
 
 def show_an_article(request):
@@ -39,6 +15,8 @@ def show_an_article(request):
             # 判断是否已经有点赞了
             temp = LikeList.objects.filter(article_id=article_id, author_id=author_id)
             likes_judge = bool(temp)
+
+            comments = Comment.objects.filter(article_id=article_id)
 
             data = {
                 "userName": user.user.username,

@@ -21,6 +21,9 @@ class Article(models.Model):
     article_type2 = models.CharField(blank=True, max_length=10)
     article_type3 = models.CharField(blank=True, max_length=10)
 
+    def __str__(self):
+        return self.article_title
+
 
 class Comment(models.Model):
     comment_text = models.TextField(max_length=500)
@@ -30,6 +33,12 @@ class Comment(models.Model):
     comment_audio = models.FileField(blank=True)
     comment_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['comment_time']
+
+    def __str__(self):
+        return str(self.article_id) + ": " + str(self.commenter_id)
+
 
 class LikeList(models.Model):
     """
@@ -37,3 +46,6 @@ class LikeList(models.Model):
     """
     article_id = models.IntegerField()
     user_id = models.IntegerField()
+
+    def __str__(self):
+        return str(self.article_id) + ": " + str(self.user_id)
