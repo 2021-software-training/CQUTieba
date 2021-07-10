@@ -17,13 +17,17 @@ class Article(models.Model):
     likes_num = models.PositiveIntegerField(default=0)
     comments_num = models.PositiveIntegerField(default=0)
 
+    article_type1 = models.CharField(blank=True)
+    article_type2 = models.CharField(blank=True)
+    article_type3 = models.CharField(blank=True)
+
 
 class Comment(models.Model):
     comment_text = models.TextField(max_length=500)
     commenter_id = models.PositiveIntegerField()
     article_id = models.PositiveIntegerField()
-    likes_num = models.PositiveIntegerField()
-    comment_audio = models.FileField()
+    likes_num = models.PositiveIntegerField(default=0)
+    comment_audio = models.FileField(blank=True)
     comment_time = models.DateTimeField(auto_now_add=True)
 
 
