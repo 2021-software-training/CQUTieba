@@ -1,18 +1,18 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from demo.models import Article
 import json
+from django.http import HttpResponse
+from mainpage.models import Article, Comment
+from login.models import NumCounter
 
 
 def add_article(request):
     """
-       用于新增文章
-       :param request: {
-           articleID, authorId, articleText
-               articleAudio(默认先不管这个 默认这个为空) articleTitle
-                   articleType1 articleType2 articleType3
-           }
-       :return: json形式的 {result: "yes"/"no"}
+    用于新增文章
+    :param request: {
+        articleID, authorId, articleText
+            articleAudio(默认先不管这个 默认这个为空) articleTitle
+                articleType1 articleType2 articleType3
+        }
+    :return: json形式的 {result: "yes"/"no"}
     """
     if request.method == "GET":
         add_authorID = request.GET['authorID']
@@ -37,3 +37,14 @@ def add_article(request):
         article.save()
         return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
+
+
+def add_comment(request):
+    """
+
+    :param request: {
+        commentText, commentID, articleID
+            commentAudio(先默认为空)
+        }
+    :return:
+    """
