@@ -17,9 +17,9 @@ class Article(models.Model):
     likes_num = models.PositiveIntegerField(default=0)
     comments_num = models.PositiveIntegerField(default=0)
 
-    article_type1 = models.CharField(blank=True)
-    article_type2 = models.CharField(blank=True)
-    article_type3 = models.CharField(blank=True)
+    article_type1 = models.CharField(blank=True, max_length=10)
+    article_type2 = models.CharField(blank=True, max_length=10)
+    article_type3 = models.CharField(blank=True, max_length=10)
 
 
 class Comment(models.Model):
