@@ -14,6 +14,7 @@ def add_comment(request):#第一次加入文章
         likes_num=0
         comment_audio=request.GET(['comment_audio'])
         comment_time=request.GET(['comment_time'])
+        comment_text+="\n"+"{0} 回复 {1}".format(commenter_id,article_id)
         comment_this=Comment(
             comment_text,commenter_id,article_id,
             likes_num,comment_audio,comment_time
