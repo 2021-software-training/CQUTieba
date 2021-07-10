@@ -2,26 +2,26 @@ from django.core.mail import BadHeaderError, send_mail
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
-from email_sender.models import EmailVerifyRecord
-from email_send import random_str
-def main(request):
-    return HttpResponse("email_sender")
-# Create your views here.
-def main1(request):
-    return render(request,'reg_index.html')
-def register(request):
-    username,password,age=request.GET(['username']),request.GET(['password']),request.GET(['age'])
-    sex,CAPTCHA=request.GET(['sex']),request.GET(['CAPTCHA'])
-    #抓取信息
-class ActiveUserView(View):
-    def get(self,request,active_code):
-        all_record=EmailVerifyRecord.objects.filter(code=active_code)
-        if(all_record):
-            for record in all_record:
-                email=record.email
-        else:
-            return HttpResponse("激活失败")
-        #转到激活失败
-        return HttpResponse("激活成功")
+from email_sender.util import EmailVerifyRecord#工具库引入
+from email_sender.email_send import *
+def email_dir(request):#导引函数，填写邮箱之后会跳转
+    email_address=request.GET(['email_address'])#前端抓取信息
+    send_method=request.method#发送的信息类别
+    if(check_email(email_address)):# 如果邮箱存在
+        if(send_method=="regist"):
+            send_method="注册"
+            send_register_email(email_address,send_type="regist")#发送邮箱
+        elif(send_method=="forget"):
+            send_method="找回"
+            send_register_email(email_address,send_type="forget")#发送邮箱
+        return HttpResponse("邮箱操作方式%s"%(send_method))
+    else:
+        return HttpResponse("该邮箱已经存在,请重新来过")
+def email_op(request,code):#邮箱操作的函数,发送邮箱之后激活
+    return HttpResponse('你的邮箱验证码<br> <h1>{0}</h1>'.format(code))
+#测试完毕
+
+
+
 
 

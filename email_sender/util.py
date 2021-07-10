@@ -1,8 +1,5 @@
 from datetime import datetime
 class EmailVerifyRecord():#邮箱类别
-    """
-    图形验证码
-    """
     def __init__(self,code='a',email="b",send_choice="regist",send_time=datetime.now()):
         self.code=code#验证码
         self.email=email#邮箱地址

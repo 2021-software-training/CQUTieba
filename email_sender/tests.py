@@ -7,9 +7,10 @@ import django
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CQUTieba.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pro2.settings')
 django.setup()
 from email_sender.util import EmailVerifyRecord
 from email_sender.email_send import send_register_email,random_str
 if __name__ == "__main__":
-    send_register_email("2669188718@qq.com",send_type="email_sender")
+    code=send_register_email("2669188718@qq.com",send_type="regist")
+    print(code)
