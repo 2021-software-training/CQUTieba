@@ -104,7 +104,7 @@ def show_user_article(request):
         }:
     :return [article1, article2, ....]:
     """
-    articles = Article.objects.get(author_id=request.GET['authorID']) \
+    articles = Article.objects.filter(author_id=request.GET['authorID']) \
         .order_by('-article_time')
     articles_data = []
     for x in articles:
@@ -113,7 +113,7 @@ def show_user_article(request):
         temp['title'] = x.article_title
         temp['time'] = str(x.article_time)
         temp['likesNum'] = x.likes_num
-        temp['commentsNum'] = x.comm
+        temp['commentsNum'] = x.comments_num
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
