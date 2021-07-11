@@ -7,5 +7,3 @@ admin.site.register(Article)
 admin.site.register(Comment)
 admin.site.register(LikeList)
 # Register your models here.
-admin.site.register(Article)
-admin.site.register(Comment)
