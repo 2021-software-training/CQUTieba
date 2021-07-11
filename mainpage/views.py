@@ -123,8 +123,10 @@ def show_all_articles(request):
     articles_data = []
     for x in articles:
         temp = dict()
+        temp['ID'] = x.article_id
         temp['title'] = x.article_title
         temp['time'] = str(x.article_time)
+        temp['likes_num'] = x.likes_num
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
