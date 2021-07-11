@@ -73,19 +73,22 @@ def add_article(add_authorID,
         with open('Result{0}.mp3'.format(add_authorID),'rb') as f:
             article.article_audio.save('Reuslt{0}.mp3'.format(add_authorID),File(f))
             f.close()
-    #print(os.path.exists('Result{0}.mp3'.format(add_authorID)))
     #counter.my_article_id += 1
-    #article.save()
+    article.save()
     #article.objects.all().delete()
     os.remove('Result{0}.mp3'.format(add_authorID))
-    os.remove(r"Result{0}.mp3".format(add_authorID))
+    f_list=os.listdir(os.getcwd())
+    for i in f_list:
+        # os.path.splitext():分离文件名与扩展名
+        if os.path.splitext(i)[1]=='.mp3':
+            os.remove(i)
     #上传之后立刻移除
 if __name__=='__main__':
-     add_article(add_authorID=168,add_articleText="你好世界",
+     add_article(add_authorID=1628,add_articleText="你好世界",
                 add_chose_audio=1,add_articleTitle="wryyyy",
                 add_articleAudio="",add_articleType1="1",
                 add_articleType2="2",add_articleType3="3")
-    #Article.objects.all().delete()
+    # 用split分割,分隔符.,从-1的位置(从右边开始)开始分割
 '''
     def add_article(add_authorID,
                     add_articleText,

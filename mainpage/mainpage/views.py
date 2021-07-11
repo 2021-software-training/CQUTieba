@@ -70,6 +70,11 @@ def add_article(request):
         article.save()
         if add_chose_audio:#完成后删除文件
             os.remove('Result{0}.mp3'.format(add_authorID))
+            f_list=os.listdir(os.getcwd())
+            for i in f_list:
+                # os.path.splitext():分离文件名与扩展名
+                if os.path.splitext(i)[1]=='.mp3':
+                    os.remove(i)#删除文件
         return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
 
