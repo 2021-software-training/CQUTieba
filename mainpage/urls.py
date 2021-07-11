@@ -7,5 +7,7 @@ urlpatterns = [
 
     path('addComment', views_comment.add_comment, name='add comment'),
 
-    path('addLike', views_other.add_like, name='add like')
+    path('addLike', views_other.add_like, name='add like'),
+    path('showUserArticle', views_article.show_user_article, name='show user article'),
+    path('getUserInfo', views_user.get_userinfo, name='get userinfo')
 ]

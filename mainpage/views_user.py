@@ -1,8 +1,6 @@
 import json
 from django.http import HttpResponse, JsonResponse
-from mainpage.models import Article, Comment, LikeList
-from login.models import NumCounter, MyUser
-from django.db.models.query import QuerySet
+from login.models import MyUser
 
 
 def get_userinfo(request):
@@ -14,22 +12,28 @@ def get_userinfo(request):
     :return
     """
 
+    if request.method == "GET":
+        my_user_id = request.GET['userID']
+        data = {}
+        try:
+            my_user = MyUser.objects.get(pk=my_user_id)
+            data["userID"] = my_user_id
+            data["username"] = my_user.user.username
+            data["email"] = my_user.user.email
+            data["gender"] = my_user.gender
+            data["age"] = my_user.age
 
-def show_user_comment(request):
-    """
-    获得指定用户的历史评论，并将评论放入列表之中[article1, article2, ....]
-    article为dict <--> json
-    包括被评论文章的id, 标题title，时间time，类别1article_type1, 类别2article_type2，类别3article_type3
-    评论时间time, 评论的内容
-    :param request:
+            data["addressProvinces"] = my_user.address_provinces
+            data["addressCity"] = my_user.address_city
 
-    message {
-        comment {
+            data["habits1"] = my_user.habits1
+            data["habits2"] = my_user.habits2
+            data["habits3"] = my_user.habits3
+            data["signature"] = my_user.signature
+            data["expValue"] = my_user.exp_value
+            data["front_size"] = my_user.front_size
+            # data["photo"] =
+        except MyUser.DoesNotExist:
+            data = {"result": "no"}
 
-        },
-        article {
-
-        }
-    }
-    :return: [message1, message2, .....]
-    """
+        return JsonResponse(data=data)
