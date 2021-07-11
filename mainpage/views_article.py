@@ -1,8 +1,8 @@
-import json
 from django.http import HttpResponse, JsonResponse
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
+import json
 
 
 def add_article(request):
@@ -31,46 +31,6 @@ def add_article(request):
         article.save()
         return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
-
-
-def add_comment(request):
-    """
-
-    :param request: {
-        commentText, commentID, articleID
-            commentAudio(先默认为空)
-        }
-    :return:
-    """
-
-
-def add_like(request):
-    """
-    添加点赞
-    对指定文章添加点赞数，并操控LikeList表，添加一对 文章 <-> 用户 点赞关联
-    :param request: {
-        articleID, userID
-        }
-    :return void:
-    """
-    if request.method == "GET":
-        like_article_id = request.GET['articleID']
-        like_user_id = request.GET['userID']
-        try:
-            # 该用户点赞过该文章, 撤销点赞, 删除点赞关联
-            LikeList.objects.get(article_id=like_article_id, user_id=like_user_id).delete()
-            new_like_num = Article.objects.get(article_id=like_article_id).likes_num - 1
-            Article.objects.get(article_id=like_article_id).update(likes_num=new_like_num)
-        except LikeList.DoesNotExist:
-            # 该用户未点赞该文章, 进行点赞, 增加点赞关联
-            new_like = LikeList(
-                article_id=like_article_id,
-                user_id=like_user_id,
-            )
-            new_like.save()
-            new_like_num = Article.objects.get(article_id=like_article_id).likes_num + 1
-            Article.objects.get(article_id=like_article_id).update(likes_num=new_like_num)
-    return
 
 
 def show_an_article(request):
@@ -125,7 +85,35 @@ def show_all_articles(request):
     for x in articles:
         temp = dict()
         temp['title'] = x.article_title
+        temp['time'] = ("{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
+        temp['articleType1'] = x.article_type1
+        temp['articleType2'] = x.article_type2
+        temp['articleType3'] = x.article_type3
+        temp['articleID'] = x.article_id
+        articles_data.append(temp)
+    return JsonResponse(data=articles_data, safe=False)
+
+
+def show_user_article(request):
+    """
+    获得指定用户的历史文章，并将文章放入列表之中[article1, article2, ....]
+    article为dict <--> json
+    包括文章ID, 标题title, 时间time, 点赞数likes_num, 类别1article_type1, 类别2article_type2, 类别3article_type3
+    :param request {
+        authorID: author_id
+        }:
+    :return [article1, article2, ....]:
+    """
+    articles = Article.objects.filter(author_id=request.GET['authorID']) \
+        .order_by('-article_time')
+    articles_data = []
+    for x in articles:
+        temp = dict()
+        temp['ID'] = x.article_id
+        temp['title'] = x.article_title
         temp['time'] = str(x.article_time)
+        temp['likesNum'] = x.likes_num
+        temp['commentsNum'] = x.comments_num
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
