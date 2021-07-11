@@ -1,14 +1,15 @@
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
+from django.db.models.query import QuerySet
 
 
 def add_article(request):
     """
     用于新增文章
     :param request: {
-        articleID, authorId, articleText
+        articleID, authorID, articleText
             articleAudio(默认先不管这个 默认这个为空) articleTitle
                 articleType1 articleType2 articleType3
         }
@@ -109,4 +110,24 @@ def show_an_article(request):
             return HttpResponse(json.dumps({"result": "does not exist"}), 'application/json')
     else:
         return HttpResponse(json.dumps({"result": "not GET"}), 'application/json')
-    pass
+
+
+def show_all_articles(request):
+    """
+    展示所有文章
+    :param request {
+        page_num:
+    }:
+    :return:
+    """
+    articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+    articles_data = []
+    for x in articles:
+        temp = dict()
+        temp['title'] = x.article_title
+        temp['time'] = str(x.article_time)
+        temp['articleType1'] = x.article_type1
+        temp['articleType2'] = x.article_type2
+        temp['articleType3'] = x.article_type3
+        articles_data.append(temp)
+    return JsonResponse(data=articles_data, safe=False)

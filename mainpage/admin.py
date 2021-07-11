@@ -1,5 +1,4 @@
 from django.contrib import admin
-from mainpage.models import Article, Comment
 
 from mainpage.models import Article, Comment, LikeList
 
