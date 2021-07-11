@@ -144,15 +144,16 @@ def show_user_article(request):
         }:
     :return [article1, article2, ....]:
     """
-    articles = Article.objects.get(author_id=request.GET['authorID']) \
-        .order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+    articles = Article.objects.filter(author_id=request.GET['authorID']) \
+        .order_by('-article_time')
     articles_data = []
     for x in articles:
         temp = dict()
         temp['ID'] = x.article_id
         temp['title'] = x.article_title
         temp['time'] = str(x.article_time)
-        temp['likes_num'] = x.likes_num
+        temp['likesNum'] = x.likes_num
+        temp['commentsNum'] = x.comments_num
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
