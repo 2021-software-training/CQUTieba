@@ -91,7 +91,7 @@ def create_MP3(TEXT, PER=0, SPD=5, PIT=5, VOL=5, USR = 1):
         has_error = True
 
     save_file = "error.txt" if has_error else 'Result{0}.'.format(USR) + FORMAT #按照上传人的令牌号储存
-    with open('D:\djanggo_pros\CQUTieba-branch2\Audios\{0}'.format(save_file), 'wb') as of:
+    with open('{0}'.format(save_file), 'wb') as of:
         #注意要修改
         of.write(result_str)
 

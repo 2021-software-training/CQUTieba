@@ -5,6 +5,8 @@ from audio import *
 from django.core.files import File
 from mainpage.utils import audioInfo#引入
 import os
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 # Create your views here.
 '''
     
@@ -61,14 +63,13 @@ def add_article(request):
             article_type3=add_articleType3,
         )
         if add_chose_audio:
-            get_audio(add_articleText,add_authorID)#生成文件并上传
-            f="D:\djanggo_pros\CQUTieba-branch2\Audios\Result{0}.mp3".format(add_authorID)
-            #注意是本地文件
+            f=open('Result{0}.mp3'.format(add_authorID),'rb')
             article.article_audio.save('Reuslt{0}.mp3'.format(add_authorID),File(f))
+            f.close()
         counter.my_article_id += 1
         article.save()
         if add_chose_audio:#完成后删除文件
-            os.remove('D:\djanggo_pros\CQUTieba-branch2\Audios\Result{0}.mp3'.format(add_authorID))
+            os.remove('Result{0}.mp3'.format(add_authorID))
         return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
 

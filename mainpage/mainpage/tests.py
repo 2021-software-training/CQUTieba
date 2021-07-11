@@ -12,6 +12,8 @@ from mainpage.models import Article
 from mainpage.utils import audioInfo
 from django.core.files import File
 from mainpage.audio import *
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 def get_audio(text,user_id):#生成文件
     """
         用于完成判定后要增加语音的功能
@@ -56,7 +58,7 @@ def add_article(add_authorID,
     add_articleType3 = add_articleType3
     #counter = NumCounter.objects.get(pk=1)
     article=Article(
-        article_id="11",
+        article_id="13",
         author_id=add_authorID,
         article_text=add_articleText,
         article_audio=add_articleAudio,
@@ -68,20 +70,23 @@ def add_article(add_authorID,
     )
     if add_chose_audio:
         get_audio(add_articleText,add_authorID)#生成文件并上传
-        #f = open('D:\djanggo_pros\CQUTieba-branch2\Audios\Result{0}.mp3'.format(add_authorID),'rb')
-        #article.article_audio.save('Reuslt{0}.mp3'.format(add_authorID),File(f))
+        with open('Result{0}.mp3'.format(add_authorID),'rb') as f:
+            article.article_audio.save('Reuslt{0}.mp3'.format(add_authorID),File(f))
+            f.close()
+    #print(os.path.exists('Result{0}.mp3'.format(add_authorID)))
     #counter.my_article_id += 1
     #article.save()
     #article.objects.all().delete()
-    os.remove('D:\djanggo_pros\CQUTieba-branch2\Audios\Result{0}.mp3'.format(add_authorID))
+    os.remove('Result{0}.mp3'.format(add_authorID))
+    os.remove(r"Result{0}.mp3".format(add_authorID))
     #上传之后立刻移除
 if __name__=='__main__':
-    add_article(add_authorID=15,add_articleText="你好世界",
+     add_article(add_authorID=168,add_articleText="你好世界",
                 add_chose_audio=1,add_articleTitle="wryyyy",
                 add_articleAudio="",add_articleType1="1",
                 add_articleType2="2",add_articleType3="3")
-
-''''
+    #Article.objects.all().delete()
+'''
     def add_article(add_authorID,
                     add_articleText,
                     add_articleAudio,
