@@ -2,9 +2,11 @@ import json
 
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 
 from mainpage.models import Article, Comment, LikeList
 from login.models import MyUser, NumCounter
+from mainpage.utils import user_authentication
 
 
 def add_comment(request):
@@ -37,6 +39,11 @@ def show_user_comment(request):
     }
     :return: [message1, message2, .....]
     """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     comments = Comment.objects.filter(commenter_id=request.GET['commenterID']).order_by('-comment_time')
     comments_data = []
     for x in comments:
