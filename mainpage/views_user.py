@@ -13,7 +13,7 @@ def get_userinfo(request):
     """
     获得用户的基本个人信息，
     :param request: {
-        userID: my_user_id
+        username: my_username
     }
     :return
     """
@@ -23,12 +23,11 @@ def get_userinfo(request):
         return JsonResponse(data={"result": 0})
 
     if request.method == "GET":
-        my_user_id = request.GET['userID']
+        my_username = request.GET['username']
         data = {}
         try:
-            my_user = MyUser.objects.get(pk=my_user_id)
-            data["userID"] = my_user_id
-            data["username"] = my_user.user.username
+            my_user = MyUser.objects.get(username=my_username)
+            data["username"] = my_username
             data["email"] = my_user.user.email
             data["gender"] = my_user.gender
             data["age"] = my_user.age
