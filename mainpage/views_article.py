@@ -2,9 +2,11 @@ import json
 
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 
 from mainpage.models import Article, Comment, LikeList
 from login.models import MyUser, NumCounter
+from mainpage.utils import user_authentication
 
 
 def add_article(request):
@@ -17,6 +19,11 @@ def add_article(request):
         }
     :return: json形式的 {result: "yes"/"no"}
     """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         counter = NumCounter.objects.get(pk=1)
         article = Article(
@@ -36,6 +43,11 @@ def add_article(request):
 
 
 def show_an_article(request):
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         article_id = int(request.GET["articleID"])
         try:
@@ -78,17 +90,29 @@ def show_all_articles(request):
     """
     展示所有文章
     :param request {
-        page_num:
+        type:
     }:
     :return:
     """
-    articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    articles_type = request.GET["type"]
+    if articles_type != "all":
+        articles_temp = Article.objects.filter(
+            Q(article_type1=articles_type) | Q(article_type2=articles_type) | Q(article_type3=articles_type)
+        )
+        articles = articles_temp.order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+    else:
+        articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+
     articles_data = []
     for x in articles:
         temp = dict()
         temp['title'] = x.article_title
-        temp['time'] = (
-            "{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
+        temp['time'] = ("{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
@@ -107,6 +131,11 @@ def show_user_article(request):
         }:
     :return [article1, article2, ....]:
     """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     articles = Article.objects.filter(author_id=request.GET['authorID']) \
         .order_by('-article_time')
     articles_data = []
@@ -122,3 +151,4 @@ def show_user_article(request):
         temp['articleType3'] = x.article_type3
         articles_data.append(temp)
     return JsonResponse(data=articles_data, safe=False)
+
