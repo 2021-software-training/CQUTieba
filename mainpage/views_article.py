@@ -1,8 +1,10 @@
-from django.http import HttpResponse, JsonResponse
-from mainpage.models import Article, Comment, LikeList
-from login.models import NumCounter, MyUser
-from django.db.models.query import QuerySet
 import json
+
+from django.db.models.query import QuerySet
+from django.http import HttpResponse, JsonResponse
+
+from mainpage.models import Article, Comment, LikeList
+from login.models import MyUser, NumCounter
 
 
 def add_article(request):
@@ -85,7 +87,8 @@ def show_all_articles(request):
     for x in articles:
         temp = dict()
         temp['title'] = x.article_title
-        temp['time'] = ("{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
+        temp['time'] = (
+            "{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
