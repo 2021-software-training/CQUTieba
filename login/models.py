@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-# Create your models here.
 
 
 class MyUser(models.Model):
@@ -22,7 +21,7 @@ class MyUser(models.Model):
     signature = models.CharField(default='还没有个性签名呢~', max_length=50)
     exp_value = models.PositiveIntegerField(default=1)
 
-    front_size = models.IntegerField(default=10)
+    font_size = models.IntegerField(default=10)
 
     def __str__(self):
         return self.user.username
@@ -35,3 +34,4 @@ class NumCounter(models.Model):
 
     def __str__(self):
         return str(self.counter_id)
+    
