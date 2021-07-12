@@ -17,6 +17,10 @@ def add_article(request):
         }
     :return: json形式的 {result: "yes"/"no"}
     """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         counter = NumCounter.objects.get(pk=1)
         article = Article(
@@ -36,6 +40,10 @@ def add_article(request):
 
 
 def show_an_article(request):
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         article_id = int(request.GET["articleID"])
         try:
@@ -83,7 +91,6 @@ def show_all_articles(request):
     :return:
     """
     res = user_authentication(request)
-    print(res)
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
@@ -119,6 +126,10 @@ def show_user_article(request):
         }:
     :return [article1, article2, ....]:
     """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     articles = Article.objects.filter(author_id=request.GET['authorID']) \
         .order_by('-article_time')
     articles_data = []
