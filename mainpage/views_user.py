@@ -2,9 +2,11 @@ import json
 
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 
 from mainpage.models import Article, Comment, LikeList
 from login.models import MyUser, NumCounter
+from mainpage.utils import user_authentication
 
 
 def get_userinfo(request):
@@ -15,6 +17,10 @@ def get_userinfo(request):
     }
     :return
     """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
 
     if request.method == "GET":
         my_user_id = request.GET['userID']
@@ -51,6 +57,11 @@ def edit_userinfo(request):
     }
     :return:
     """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         my_user_id = request.GET['userID']
         data = {}
@@ -98,4 +109,3 @@ def edit_userinfo(request):
             data = {"result": "no"}
 
         return JsonResponse(data=data)
-
