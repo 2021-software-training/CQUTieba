@@ -11,6 +11,8 @@ def user_authentication(request) -> dict:
     :param request:
     :return: {
         返回验证的结果和用户名
+        "result": res[0],
+        "username": res[1]
     }
     """
     token = request.META.get("HTTP_AUTHORIZATION")

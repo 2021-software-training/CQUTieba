@@ -1,6 +1,7 @@
 import json
 from django.http import HttpResponse, JsonResponse
 from login.models import MyUser
+from mainpage.utils import user_authentication
 
 
 def get_userinfo(request):
@@ -11,6 +12,9 @@ def get_userinfo(request):
     }
     :return
     """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
 
     if request.method == "GET":
         my_user_id = request.GET['userID']

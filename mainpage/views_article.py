@@ -17,6 +17,10 @@ def add_article(request):
         }
     :return: json形式的 {result: "yes"/"no"}
     """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         counter = NumCounter.objects.get(pk=1)
         article = Article(
@@ -35,7 +39,19 @@ def add_article(request):
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
 
 
+def edit_article(request):
+    """
+
+    :param request:
+    :return:
+    """
+
+
 def show_an_article(request):
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         article_id = int(request.GET["articleID"])
         try:
@@ -74,7 +90,7 @@ def show_an_article(request):
         return HttpResponse(json.dumps({"result": "not GET"}), 'application/json')
 
 
-def show_all_articles(request):
+def show_page_all_articles(request):
     """
     展示所有文章
     :param request {
@@ -83,7 +99,6 @@ def show_all_articles(request):
     :return:
     """
     res = user_authentication(request)
-    print(res)
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
@@ -100,7 +115,11 @@ def show_all_articles(request):
     for x in articles:
         temp = dict()
         temp['title'] = x.article_title
-        temp['time'] = ("{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
+        temp['time'] = ("{:}年{:}月{:}日".format(
+                str(x.article_time.year),
+                str(x.article_time.month),
+                str(x.article_time.day)
+            ))
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
@@ -109,7 +128,7 @@ def show_all_articles(request):
     return JsonResponse(data=articles_data, safe=False)
 
 
-def show_user_article(request):
+def show_user_all_articles(request):
     """
     获得指定用户的历史文章，并将文章放入列表之中[article1, article2, ....]
     article为dict <--> json
@@ -119,14 +138,24 @@ def show_user_article(request):
         }:
     :return [article1, article2, ....]:
     """
-    articles = Article.objects.filter(author_id=request.GET['authorID']) \
-        .order_by('-article_time')
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    username = res["username"]
+    user = MyUser.objects.get(user__username=username)
+
+    articles = Article.objects.filter(author_id=user.my_user_id).order_by('-article_time')
     articles_data = []
     for x in articles:
         temp = dict()
         temp['ID'] = x.article_id
         temp['title'] = x.article_title
-        temp['time'] = str(x.article_time)
+        temp['time'] = ("{:}年{:}月{:}日".format(
+                str(x.article_time.year),
+                str(x.article_time.month),
+                str(x.article_time.day)
+            ))
         temp['likesNum'] = x.likes_num
         temp['commentsNum'] = x.comments_num
         temp['articleType1'] = x.article_type1
