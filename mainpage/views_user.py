@@ -1,6 +1,10 @@
 import json
+
+from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
-from login.models import MyUser
+
+from mainpage.models import Article, Comment, LikeList
+from login.models import MyUser, NumCounter
 
 
 def get_userinfo(request):
@@ -31,9 +35,67 @@ def get_userinfo(request):
             data["habits3"] = my_user.habits3
             data["signature"] = my_user.signature
             data["expValue"] = my_user.exp_value
-            data["front_size"] = my_user.front_size
+            data["fontSize"] = my_user.font_size
             # data["photo"] =
         except MyUser.DoesNotExist:
             data = {"result": "no"}
 
         return JsonResponse(data=data)
+
+
+def edit_userinfo(request):
+    """
+    编辑用户的个人信息
+    :param request:{
+        userID: my_user_id
+    }
+    :return:
+    """
+    if request.method == "GET":
+        my_user_id = request.GET['userID']
+        data = {}
+        try:
+            my_user = MyUser.objects.get(pk=my_user_id)
+
+            data["userID"] = my_user_id
+            new_username = request.GET['username']
+            try:
+                # 用户名已经存在
+                MyUser.objects.get(user__username=new_username)
+                data = {"result": "no"}
+            except MyUser.DoesNotExist:
+                data["username"] = new_username
+
+                new_email = request.GET['email']
+                data["email"] = new_email
+                new_gender = request.GET['gender']
+                data["gender"] = new_gender
+                new_age = request.GET['age']
+                data["age"] = new_age
+                new_address_provinces = request.GET['addressProvinces']
+                data["addressProvinces"] = new_address_provinces
+                new_address_city = request.GET['addressCity']
+                data["addressCity"] = new_address_city
+
+                new_habits1 = request.GET['habits1']
+                data["habits1"] = new_habits1
+                new_habits2 = request.GET['habits2']
+                data["habits2"] = new_habits1
+                new_habits3 = request.GET['habits3']
+                data["habits3"] = new_habits1
+                new_signature = request.GET['signature']
+                data["signature"] = new_signature
+                new_exp_value = request.GET['expValue']
+                data["expValue"] = new_exp_value
+                new_font_size = request.GET['fontSize']
+                data["fontSize"] = new_font_size
+                # new_photo = request.GET['photo']
+                # data["photo"] = new_photo
+
+                my_user.update(**data)
+
+        except MyUser.DoesNotExist:
+            data = {"result": "no"}
+
+        return JsonResponse(data=data)
+
