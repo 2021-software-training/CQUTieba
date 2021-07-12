@@ -1,17 +1,19 @@
 from django.db import models
 from login.models import MyUser
 # Create your models here.
-
-
+from mainpage.audio import *
+from django.utils import timezone
 class Article(models.Model):
     article_id = models.PositiveIntegerField(primary_key=True)
     author_id = models.PositiveIntegerField()
 
     article_text = models.TextField(max_length=20000)
     article_views = models.IntegerField(default=0)
-    article_time = models.DateTimeField(auto_now_add=True)
+    article_time = models.DateTimeField(default = timezone.now())
 
-    article_audio = models.FileField(blank=True)
+    article_chose_audio = models.BooleanField(default=True)#是否选择要上传声纹信息
+    article_audio = models.FileField(blank=True)#upload_to='D:\djanggo_pros\CQUTieba-branch2\mainpage')#声纹信息
+
     article_title = models.CharField(max_length=15)
 
     likes_num = models.PositiveIntegerField(default=0)
