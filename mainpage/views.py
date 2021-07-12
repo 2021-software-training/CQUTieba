@@ -202,7 +202,8 @@ def show_user_comment(request):
         temp['comment'] = temp_c
         temp['article'] = temp_a
         comments_data.append(temp)
-        return JsonResponse(data=comments_data, safe=False)
+        
+    return JsonResponse(data=comments_data, safe=False)
 
 
 def edit_comment(request):
