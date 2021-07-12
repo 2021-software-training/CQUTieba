@@ -6,6 +6,13 @@ from django.http import HttpResponse
 
 
 def user_authentication(request) -> dict:
+    """
+    用于检验用户的身份
+    :param request:
+    :return: {
+        返回验证的结果和用户名
+    }
+    """
     token = request.META.get("HTTP_AUTHORIZATION")
     if (token is None) or (len(str(token)) < 5):
         return {
