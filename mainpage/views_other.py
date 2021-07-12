@@ -2,9 +2,11 @@ import json
 
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 
 from mainpage.models import Article, Comment, LikeList
 from login.models import MyUser, NumCounter
+from mainpage.utils import user_authentication
 
 
 def add_like(request):
@@ -16,6 +18,11 @@ def add_like(request):
         }
     :return void:
     """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         like_article_id = request.GET['articleID']
         like_user_id = request.GET['userID']
