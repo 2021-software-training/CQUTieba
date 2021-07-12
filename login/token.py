@@ -51,12 +51,11 @@ def get_payload(token):
 def get_username(token):
     payload = get_payload(token)
     return payload['username']
-    pass
 
 
-def check_token(token):
+def check_token(token) -> tuple:
     username = get_username(token)
     last_token = cache.get(username)
     if last_token:
-        return last_token == token
-    return False
+        return last_token == token, username
+    return False, username

@@ -2,6 +2,8 @@ from django.http import HttpResponse, JsonResponse
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
+from mainpage.utils import user_authentication
+from django.db.models import Q
 import json
 
 
@@ -76,11 +78,24 @@ def show_all_articles(request):
     """
     展示所有文章
     :param request {
-        page_num:
+        type:
     }:
     :return:
     """
-    articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    articles_type = request.GET["type"]
+    if articles_type != "all":
+        articles_temp = Article.objects.filter(
+            Q(article_type1=articles_type) | Q(article_type2=articles_type) | Q(article_type3=articles_type)
+        )
+        articles = articles_temp.order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+    else:
+        articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+
     articles_data = []
     for x in articles:
         temp = dict()

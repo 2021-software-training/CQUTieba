@@ -60,20 +60,6 @@ def login(request):
     return HttpResponse("not post")
 
 
-def func1(request):
-    if request.GET["judge"] == "1":
-        return HttpResponse("yes")
-    else:
-        return HttpResponse("no")
-
-
-def func2(request):
-    if request.POST["judge"] == "1":
-        return HttpResponse("yes")
-    else:
-        return HttpResponse("no")
-
-
 def return_json(request):
     data = {"judge": 'yes'}
     return HttpResponse(json.dumps(data), content_type='application/json')

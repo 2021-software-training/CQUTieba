@@ -31,9 +31,25 @@ def get_userinfo(request):
             data["habits3"] = my_user.habits3
             data["signature"] = my_user.signature
             data["expValue"] = my_user.exp_value
-            data["front_size"] = my_user.front_size
+            data["frontSize"] = my_user.front_size
             # data["photo"] =
         except MyUser.DoesNotExist:
             data = {"result": "no"}
 
         return JsonResponse(data=data)
+
+
+def edit_userinfo(request):
+    """
+    编辑用户的个人信息
+    :param request:
+    :return:
+    """
+
+
+def edit_avatar(request):
+    """
+    修改头像
+    :param request:
+    :return:
+    """
