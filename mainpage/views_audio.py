@@ -14,28 +14,30 @@ from audio_to_text import get_text
 
 def play_article(request):
     """
-    调用create_MP3将文章转为MP3音频文件并播放
+    播放文章的MP3音频文件
     """
     res = user_authentication(request)
     print(res)
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
-    # playsound('xx.mp3')
-    pass
+    article = Article.object.get(article_id=request.GET['articleID'])
+    playsound(article.article_audio)
+    return
 
 
 def play_comment(request):
     """
-    调用create_MP3将评论转为MP3音频文件并播放
+    播放评论的MP3音频文件
     """
     res = user_authentication(request)
     print(res)
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
-    # playsound('xx.mp3')
-    pass
+    comment = Comment.object.get(comment_id=request.GET['commentID'])
+    playsound(comment.comment_audio)
+    return
 
 
 def audio_input(request):
@@ -48,3 +50,4 @@ def audio_input(request):
         return JsonResponse(data={"result": 0})
 
     pass
+
