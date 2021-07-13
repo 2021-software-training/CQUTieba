@@ -96,11 +96,12 @@ def edit_userinfo(request):
             data["expValue"] = new_exp_value
             new_font_size = request.GET['fontSize']
             data["fontSize"] = new_font_size
-            # new_photo = request.GET['photo']
-            # data["photo"] = new_photo
+            new_profile = request.GET['profile']
+            data["profile"] = new_profile
 
             # 保存新用户信息
-            my_user = MyUser(**data).save()
+            my_user = MyUser(**data)
+            my_user.save()
             # 删除旧用户信息
             MyUser.objects.get(user__username=my_old_username).delete()
 
