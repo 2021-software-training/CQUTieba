@@ -56,13 +56,14 @@ def add_article(request):
             author_id=add_authorID,
             article_text=add_articleText,
             article_audio=add_articleAudio,
-            article_chose_audio=add_chose_audio,
+            article_chose_audio=add_chose_audio,#是否需要加入语音信息
             article_title=add_articleTitle,
             article_type1=add_articleType1,
             article_type2=add_articleType2,
             article_type3=add_articleType3,
         )
         if add_chose_audio:
+            get_audio(add_articleText,add_authorID)
             f=open('Result{0}.mp3'.format(add_authorID),'rb')
             article.article_audio.save('Reuslt{0}.mp3'.format(add_authorID),File(f))
             f.close()
@@ -94,6 +95,7 @@ def add_comment(request):#第一次加入文章
         if(comment_target):#返回值是不是True
             comment_target_name = comment_target[0].author_id#查询id
             comment_text += "\n"+"{0} 评论 {1}".format(commenter_id,comment_target_name)
+
             comment_this = Comment(
                 comment_text,commenter_id,article_id,
                 comment_audio
@@ -111,3 +113,33 @@ def add_comment(request):#第一次加入文章
             comment_this.save()  #加入到数据库当中去
             return HttpResponse(json.dumps({"result":"yes","commenter":commenter_id}))
     return HttpResponse(json.dumps({"result":"no"}))
+def edit_comment(request):
+    """
+    用于修改或者删除用户的历史评论
+    :param request: {
+        commentID       :   comment_id,
+        newCommentText  :   comment_text,
+        isDelete        :   is_delete   ("1"为删除该评论，"0"为修改该评论)
+    }
+    :return:
+    """
+    #按照评论者的id
+    if request.method=='GET':
+        commentID = request.GET(['comment_id'])
+        isDelete=request.GET(['is_delete'])
+        if isDelete:
+            target_comment = Comment.objects.filter(comment_id = commentID)
+            if(target_comment):
+                target_comment.delete()
+            else:
+                return HttpResponse("评论不存在")
+        else:
+            newCommentText = request.GET(['comment_text'])
+            target_comment = Comment.objects.filter(comment_id = commentID)
+            if target_comment:
+                target_comment[0].comment_txet = newCommentText
+                target_comment[0].save()
+            else:
+                return HttpResponse("评论不存在")
+        return HttpResponse("操作成功")
+

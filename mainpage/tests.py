@@ -84,10 +84,10 @@ def add_article(add_authorID,
             os.remove(i)
     #上传之后立刻移除
 if __name__=='__main__':
-     add_article(add_authorID=1628,add_articleText="你好世界",
+    ''' add_article(add_authorID=1628,add_articleText="你好世界",
                 add_chose_audio=1,add_articleTitle="wryyyy",
                 add_articleAudio="",add_articleType1="1",
-                add_articleType2="2",add_articleType3="3")
+                add_articleType2="2",add_articleType3="3")'''
     # 用split分割,分隔符.,从-1的位置(从右边开始)开始分割
 '''
     def add_article(add_authorID,
@@ -97,4 +97,5 @@ if __name__=='__main__':
                     add_articleTitle,
                     add_articleType1,
                     add_articleType2,
-                    add_articleType3,)'''
+                    add_articleType3,)
+                    '''
