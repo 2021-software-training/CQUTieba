@@ -87,9 +87,9 @@ def edit_userinfo(request):
             new_habits1 = request.GET['habits1']
             data["habits1"] = new_habits1
             new_habits2 = request.GET['habits2']
-            data["habits2"] = new_habits1
+            data["habits2"] = new_habits2
             new_habits3 = request.GET['habits3']
-            data["habits3"] = new_habits1
+            data["habits3"] = new_habits3
             new_signature = request.GET['signature']
             data["signature"] = new_signature
             new_exp_value = request.GET['expValue']
