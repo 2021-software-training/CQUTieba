@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from mainpage.models import *
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponse,HttpResponseRedirect,JsonResponse
 from audio import *
 from django.core.files import File
 from mainpage.utils import audioInfo#引入
 import os
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.utils import timezone
 # Create your views here.
 '''
     
@@ -79,9 +80,10 @@ def add_article(request):
         return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
 
-def add_comment(request):#第一次加入文章
+def add_comment_article(request):#第一次加入文章,必须要有是谁加进来的
     """
        :param request: {
+       commenterID
            commentText, commentID, articleID
                commentAudio(先默认为空)
            }
@@ -91,28 +93,77 @@ def add_comment(request):#第一次加入文章
         comment_text = request.GET(['comment_text'])
         commenter_id = request.GET(['commenter_id'])
         article_id = request.GET(['article_id'])
+        is_add_audio=request.GET(['is_add_audio'])
         comment_target = Article.objects.filter(article_id=article_id)#查询这篇文章的作者在不在
-        if(comment_target):#返回值是不是True
+        if(comment_target):#返回值是是True
             comment_target_name = comment_target[0].author_id#查询id
-            comment_text += "\n"+"{0} 评论 {1}".format(commenter_id,comment_target_name)
-
             comment_this = Comment(
                 comment_text,commenter_id,article_id,
-                comment_audio
+                comment_audio,comment_to=1
             )
+            if is_add_audio:
+                get_audio(comment_text,commenter_id)  #生成对应的文件
+            f=open('Result{0}.mp3'.format(commenter_id),'rb')
+            comment_this.comment_audio.save('Reuslt{0}.mp3'.format(commenter_id),File(f))
+            f.close()
+            if add_chose_audio:  #完成后删除文件
+                f_list=os.listdir(os.getcwd())
+                for i in f_list:
+                    # os.path.splitext():分离文件名与扩展名
+                    if os.path.splitext(i)[1]=='.mp3':
+                        os.remove(i)  #删除文件
+            comment_this.comment_text+="\n"+"{0} 评论 {1}".format(commenter_id,comment_target_name)
             comment_this.save()#加入到数据库当中去
             return HttpResponse(json.dumps({"result": "yes","commenter":commenter_id}))
         else:
-            comment_target = Comment.objects.filter(article_id=article_id)#回复的
-            comment_target_name=comment_target[0].article_id  #查询id
-            comment_text+="\n"+"{0} 回复 {1}".format(commenter_id,comment_target_name)
-            comment_this=Comment(
-                comment_text,commenter_id,article_id,
-                comment_audio
-            )
-            comment_this.save()  #加入到数据库当中去
-            return HttpResponse(json.dumps({"result":"yes","commenter":commenter_id}))
+            return HttpResponse(json.dumps({"result":"no","commenter":commenter_id}))
     return HttpResponse(json.dumps({"result":"no"}))
+def add_comment_comment(request):#针对评论
+    """
+           :param request: {
+               commentText, commentID, articleID
+                   commentAudio(先默认为空)
+                   commenterID(评论是谁)
+               }
+           :return:
+    """
+    if request.method=='GET':
+        commentText = request.GET(['commentText'])#评论什么
+        commentID = request.GET(['commentID'])#评论
+        articleID = request.GET(['articleID'])#评论的是哪个评论
+        isAddAudio = request.GET(['isAddAudio'])#要不要加入语音信息
+        commentAudio=""
+        commenterID = request.GET(['CommenterID'])
+        comment_target=Comment.objects.filter(comment_id=articleID)  #查询这篇文章的作者在不在
+        if (comment_target):  #返回值是是True
+            comment_target_name=comment_target[0].commenter_id  #查询id
+            comment_this=Comment(
+                comment_id=commentID,
+                comment_text = commentText,
+                commenter_id = commenterID,
+                article_id = articleID,
+                comment_audio = commentAudio,
+                comment_to = 0
+            )
+            if isAddAudio:
+                get_audio(commentText,commenterID)  #生成对应的文件
+            f=open('Result{0}.mp3'.format(commenterID),'rb')
+            comment_this.comment_audio.save('Reuslt{0}.mp3'.format(commenterID),File(f))
+            f.close()
+            if add_chose_audio:  #完成后删除文件
+                f_list=os.listdir(os.getcwd())
+                for i in f_list:
+                    # os.path.splitext():分离文件名与扩展名
+                    if os.path.splitext(i)[1]=='.mp3':
+                        os.remove(i)  #删除文件
+            comment_this.comment_text+="\n"+"{0} 回复 {1}".format(commenterID,comment_target_name)
+            comment_this.save()  #加入到数据库当中去
+            return HttpResponse(json.dumps({"result":"yes","commenter":commenterID}))
+        else:
+            return HttpResponse(json.dumps({"result":"no","commenter":commenterID}))
+    return HttpResponse(json.dumps({"result":"no"}))
+
+#完毕
 def edit_comment(request):
     """
     用于修改或者删除用户的历史评论
@@ -125,21 +176,51 @@ def edit_comment(request):
     """
     #按照评论者的id
     if request.method=='GET':
-        commentID = request.GET(['comment_id'])
-        isDelete=request.GET(['is_delete'])
-        if isDelete:
+        comment_id = request.GET(['commentID'])
+        is_delete = request.GET(['isDelete'])
+        if is_delete:
             target_comment = Comment.objects.filter(comment_id = commentID)
             if(target_comment):
-                target_comment.delete()
+                target_comment[0].delete()
+                return HttpResponse("删除成功")
             else:
-                return HttpResponse("评论不存在")
+                return JsonResponse({"result":"no"})
         else:
-            newCommentText = request.GET(['comment_text'])
+            comment_text = request.GET(['newCommentText'])#新评论
             target_comment = Comment.objects.filter(comment_id = commentID)
+            #旧评论
             if target_comment:
-                target_comment[0].comment_txet = newCommentText
-                target_comment[0].save()
+                comment_this = target_comment[0]
+                if comment_this.comment_to:
+                    tar = comment_this.comment_text.split('\n')[-1]#最后文本标记信息
+                    comment_this.comment_text = comment_text
+                    get_audio(comment_text,comment_this.commenter_id)
+                    f=open('Result{0}.mp3'.format(comment_this.commenter_id),'rb')
+                    comment_this.comment_audio.save('Reuslt{0}.mp3'.format(comment_this.commenter_id),File(f))
+                    f.close()
+                    f_list=os.listdir(os.getcwd())
+                    for i in f_list:
+                        # os.path.splitext():分离文件名与扩展名
+                        if os.path.splitext(i)[1]=='.mp3':
+                            os.remove(i)  #删除文件
+                    comment_this.comment_text += ('\n'+tar)
+                    comment_this.save()
+                else:
+                    tar=comment_this.comment_text.split('\n')[-1]  #最后文本标记信息
+                    comment_this.comment_text=comment_text
+                    get_audio(comment_text,comment_this.commenter_id)
+                    f=open('Result{0}.mp3'.format(comment_this.commenter_id),'rb')
+                    comment_this.comment_audio.save('Reuslt{0}.mp3'.format(comment_this.commenter_id),File(f))
+                    f.close()  #完成后删除文件
+                    f_list=os.listdir(os.getcwd())
+                    for i in f_list:
+                        # os.path.splitext():分离文件名与扩展名
+                        if os.path.splitext(i)[1]=='.mp3':
+                            os.remove(i)  #删除文件
+                    comment_this.comment_text += ('\n'+tar)
+                    comment_this.save()
+                return JsonResponse({"result":"yes"})
             else:
-                return HttpResponse("评论不存在")
-        return HttpResponse("操作成功")
+                return JsonResponse({"result":"no"})
+        return JsonResponse({"result":"no"})
 
