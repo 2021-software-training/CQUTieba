@@ -41,7 +41,7 @@ def get_userinfo(request):
             data["signature"] = my_user.signature
             data["expValue"] = my_user.exp_value
             data["fontSize"] = my_user.font_size
-            # data["photo"] =
+            data["profile"] = my_user.profile
         except MyUser.DoesNotExist:
             data = {"result": "no"}
 
