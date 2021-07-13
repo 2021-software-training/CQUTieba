@@ -1,6 +1,5 @@
 from django.db import models
 from login.models import MyUser
-# Create your models here.
 
 
 class Article(models.Model):
@@ -11,7 +10,7 @@ class Article(models.Model):
     article_views = models.IntegerField(default=0)
     article_time = models.DateTimeField(auto_now_add=True)
 
-    article_audio = models.FileField(blank=True)
+    article_audio = models.FileField(upload_to="audio/", blank=True)
     article_title = models.CharField(max_length=15)
 
     likes_num = models.PositiveIntegerField(default=0)
@@ -30,7 +29,7 @@ class Comment(models.Model):
     commenter_id = models.PositiveIntegerField()
     article_id = models.PositiveIntegerField()
     likes_num = models.PositiveIntegerField(default=0)
-    comment_audio = models.FileField(blank=True)
+    comment_audio = models.FileField(upload_to="audio/", blank=True)
     comment_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
