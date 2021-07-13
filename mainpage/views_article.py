@@ -3,6 +3,8 @@ from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
 import json
+import random
+import math
 
 
 def add_article(request):
@@ -72,6 +74,47 @@ def show_an_article(request):
         return HttpResponse(json.dumps({"result": "not GET"}), 'application/json')
 
 
+def judge_similarity(request):  # 根据用户喜好来设置随机值的范围，从而实现按用户兴趣推荐
+    if request.method == "GET":
+        my_user_id = request.GET['userID']
+        user = MyUser.objects.get(pk=my_user_id)
+        user_habit = [user.habits1, user.habit2, user.habit3]
+
+        article_id = int(request.GET["articleID"])
+        article = Article.objects.get(article_id)
+        article_type = [article.type1, article.type2, article.type3]
+        i = len(set(user_habit) & set(article_type))
+        if i == 3:
+            r = random.uniform(1.1, 1.3)
+        elif i == 2:
+            r = random.uniform(0.9, 1.1)
+        elif i == 1:
+            r = random.uniform(0.7, 0.9)
+        else:
+            r = random.uniform(0.5, 0.7)
+        return r
+
+
+def recommend(article_id):
+    article = Article.objects.get(article_id)
+    article_views = article.article_views
+    likes_num = article.likes_num
+    comments_num = article.comments_num
+    article_time = article.article_time
+    # if article_time <= 24:  # 对重力因子的值也根据发布时间设置一个大小
+    #    i = 1
+    # else:
+    #   i = 1 + (article_time - 24) // 24
+
+    a = math.ceil(article_time)  # 对age向上取整
+    s = 0.14 * 1 / 1000 * article_views + 0.24 * 1 / 15 * likes_num + 0.62 * comments_num  # 分子
+    if s != 0:
+        w = s * judge_similarity() / a
+    else:
+        w = 0
+    return w  # 返回权重值
+
+
 def show_all_articles(request):
     """
     展示所有文章
@@ -80,18 +123,26 @@ def show_all_articles(request):
     }:
     :return:
     """
-    articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
-    articles_data = []
-    for x in articles:
-        temp = dict()
-        temp['title'] = x.article_title
-        temp['time'] = ("{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
-        temp['articleType1'] = x.article_type1
-        temp['articleType2'] = x.article_type2
-        temp['articleType3'] = x.article_type3
-        temp['articleID'] = x.article_id
-        articles_data.append(temp)
-    return JsonResponse(data=articles_data, safe=False)
+    if request.method == "GET":
+        article_id = int(request.GET["articleID"])
+        articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+
+        articles_data = []
+        for x in articles:
+            articles_data.append(x)
+        articles_data.sort(key=recommend(article_id))
+
+        for x in articles:
+            temp = dict()
+            temp['title'] = x.article_title
+            temp['time'] = (
+                "{:}年{:}月{:}日".format(str(x.article_time.year), str(x.article_time.month), str(x.article_time.day)))
+            temp['articleType1'] = x.article_type1
+            temp['articleType2'] = x.article_type2
+            temp['articleType3'] = x.article_type3
+            temp['articleID'] = x.article_id
+            articles_data.append(temp)
+        return JsonResponse(data=articles_data, safe=False)
 
 
 def show_user_article(request):
