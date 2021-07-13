@@ -1,5 +1,6 @@
 import json
 
+from django.core.files import File
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
@@ -7,6 +8,7 @@ from django.db.models import Q
 from mainpage.models import Article, Comment, LikeList
 from login.models import MyUser, NumCounter
 from mainpage.utils import user_authentication
+from text_to_audio import create_MP3
 
 
 def add_article(request):
@@ -30,14 +32,22 @@ def add_article(request):
             article_id=counter.my_article_id,
             author_id=request.GET['authorID'],
             article_text=request.GET['articleText'],
-            article_audio="",
+            article_audio=None,
             article_title=request.GET['articleTitle'],
             article_type1=request.GET['articleType1'],
             article_type2=request.GET['articleType2'],
             article_type3=request.GET['articleType3'],
         )
-        counter.my_article_id += 1
         article.save()
+        PER = request.GET['PER']  # 人物, 取值0, 1, 3, 4
+        SPD = request.GET['SPD']  # 语速, 取值0-15
+        PIT = request.GET['PIT']  # 音调, 取值0-15
+        VOL = request.GET['VOL']  # 音量, 取值0-9
+        filepath = create_MP3(request.GET['articleText'], PER, SPD, PIT, VOL)
+        f = open(filepath, 'rb')
+        article.article_audio.save(article.article_id + '.mp3', File(f))
+        counter.my_article_id += 1
+
         return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
 
@@ -151,4 +161,3 @@ def show_user_article(request):
         temp['articleType3'] = x.article_type3
         articles_data.append(temp)
     return JsonResponse(data=articles_data, safe=False)
-
