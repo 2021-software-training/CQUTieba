@@ -50,4 +50,4 @@ def audio_input(request):
         return JsonResponse(data={"result": 0})
 
     filepath = request.GET['filepath']
-    return get_text(audio)
+    return JsonResponse(data=get_text(filepath))
