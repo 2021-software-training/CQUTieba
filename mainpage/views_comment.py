@@ -25,17 +25,16 @@ def show_article_comment(request):
     """
     获得指定文章的历史评论，并将评论放入列表之中[message1, message2, ....]（时间顺序）
     message dict <--> json
-    包括评论的id，标题title，时间time，类别1article_type1, 类别2article_type2，类别3article_type3
-    评论时间time, 评论的内容
-    :param request: 
+    包括评论的id，评论时间time, 评论的内容, 用户ID, 用户名username, 用户头像profile
+    :param request:
     message {
         comment {
             commentID.....
             commentText....
         },
-        article {
-            title....
-            time.....
+        user {
+            ID....
+            name.....
         }
     }
     :return: [message1, message2, .....]
@@ -54,16 +53,14 @@ def show_article_comment(request):
         temp_c['commentLikesNum'] = x.likes_num
         temp_c['commentAudio'] = x.comment_audio
         temp_c['commentTime'] = x.comment_time
-        a = Article.objects.get(article_id=x.article_id)
-        temp_a = dict()
-        temp_a['articleTime'] = a.article_time
-        temp_a['articleTitle'] = a.article_title
-        temp_a['articleType1'] = a.article_type1
-        temp_a['articleType2'] = a.article_type2
-        temp_a['articleType3'] = a.article_type3
+        u = MyUser.objects.get(my_user_id=x.commenter_id)
+        temp_u = dict()
+        temp_u['userID'] = u.my_user_id
+        temp_u['username'] = u.username
+        temp_u['profile'] = u.profile
         temp = dict()
         temp['comment'] = temp_c
-        temp['article'] = temp_a
+        temp['user'] = temp_u
         comments_data.append(temp)
     return JsonResponse(data=comments_data, safe=False)
 
