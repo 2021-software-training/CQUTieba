@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
-from mainpage.utils import user_authentication
+from mainpage.utils import user_authentication, get_user_name
 from django.db.models import Q
 import json
 
@@ -45,6 +45,23 @@ def edit_article(request):
     :param request:
     :return:
     """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    article_id = request.GET["articleID"]
+
+    article = Article(
+        author_id=request.GET['authorID'],
+        article_text=request.GET['articleText'],
+        article_audio="",
+        article_title=request.GET['articleTitle'],
+        article_type1=request.GET['articleType1'],
+        article_type2=request.GET['articleType2'],
+        article_type3=request.GET['articleType3'],
+    )
+
+    return JsonResponse(data={'result': "success"})
 
 
 def show_an_article(request):
@@ -60,17 +77,16 @@ def show_an_article(request):
             user = MyUser.objects.get(my_user_id=author_id)
 
             # 判断是否已经有点赞了
-            temp = LikeList.objects.filter(article_id=article_id, author_id=author_id)
+            temp = LikeList.objects.filter(article_id=article_id, user_id=author_id)
             likes_judge = bool(temp)
 
             comments = Comment.objects.filter(article_id=article_id)
 
             data = {
-                "userName": user.user.username,
+                "authorName": user.user.username,
                 "authorID": user.my_user_id,
                 "articleID": article.article_id,
                 "articleText": article.article_text,
-                "articleViews": article.article_views,
                 "articleTime": str(article.article_time),
                 # "articleAudio": article_audio,
                 "articleTitle": article.article_title,
@@ -78,16 +94,16 @@ def show_an_article(request):
                 "commentsNum": article.comments_num,
                 "articleType1": article.article_type1,
                 "articleType2": article.article_type2,
-                "article_type3": article.article_type3,
+                "articleType3": article.article_type3,
                 "likeJudge": likes_judge
             }
             article.article_views += 1
             article.save()
-            return HttpResponse(json.dumps({"result": data}), 'application/json')
+            return JsonResponse(data=data)
         except Article.DoesNotExist:
-            return HttpResponse(json.dumps({"result": "does not exist"}), 'application/json')
+            return JsonResponse({"result": "does not exist"})
     else:
-        return HttpResponse(json.dumps({"result": "not GET"}), 'application/json')
+        return JsonResponse({"result": "not GET"})
 
 
 def show_page_all_articles(request):
@@ -103,7 +119,7 @@ def show_page_all_articles(request):
         return JsonResponse(data={"result": 0})
 
     articles_type = request.GET["type"]
-    if articles_type != "all":
+    if articles_type != "All":
         articles_temp = Article.objects.filter(
             Q(article_type1=articles_type) | Q(article_type2=articles_type) | Q(article_type3=articles_type)
         )
@@ -114,16 +130,21 @@ def show_page_all_articles(request):
     articles_data = []
     for x in articles:
         temp = dict()
+        temp['articleID'] = x.article_id
         temp['title'] = x.article_title
         temp['time'] = ("{:}年{:}月{:}日".format(
                 str(x.article_time.year),
                 str(x.article_time.month),
                 str(x.article_time.day)
             ))
+        temp['authorName'] = get_user_name(x)
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
+        temp['articleText'] = x.article_text
         temp['articleID'] = x.article_id
+        temp['commentsNum'] = x.comments_num
+        temp['likesNum'] = x.likes_num
         articles_data.append(temp)
     return JsonResponse(data=articles_data, safe=False)
 
@@ -149,17 +170,20 @@ def show_user_all_articles(request):
     articles_data = []
     for x in articles:
         temp = dict()
-        temp['ID'] = x.article_id
+        temp['articleID'] = x.article_id
         temp['title'] = x.article_title
         temp['time'] = ("{:}年{:}月{:}日".format(
                 str(x.article_time.year),
                 str(x.article_time.month),
                 str(x.article_time.day)
             ))
-        temp['likesNum'] = x.likes_num
-        temp['commentsNum'] = x.comments_num
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
+        temp['articleText'] = x.article_text
+        temp['articleID'] = x.article_id
+        temp['viewsNum'] = x.article_views
+        temp['commentsNum'] = x.comments_num
+        temp['likesNum'] = x.likes_num
         articles_data.append(temp)
     return JsonResponse(data=articles_data, safe=False)

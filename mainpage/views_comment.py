@@ -6,15 +6,47 @@ from django.db.models.query import QuerySet
 from mainpage.utils import user_authentication
 
 
+# 需要修改一下
 def add_comment(request):
     """
+       :param request: {
+           commentText, commentID, articleID
+               commentAudio(先默认为空)
+           }
+       :return:
+       """
+    if request.method == "GET":
+        comment_text = request.GET(['comment_text'])
+        commenter_id = request.GET(['commenter_id'])
+        article_id = request.GET(['article_id'])
+        # 查询这篇文章的作者在不在
+        comment_target = Article.objects.filter(article_id=article_id)
 
-    :param request: {
-        commentText, commentID, articleID
-            commentAudio(先默认为空)
-        }
-    :return:
-    """
+        # 返回值是不是True
+        if comment_target:
+            # 查询id
+            comment_target_name = comment_target[0].author_id
+            comment_text += "\n"+"{0} 评论 {1}".format(commenter_id, comment_target_name)
+            comment_this = Comment(
+                comment_text=comment_text,
+                commenter_id=commenter_id,
+                article_id=article_id,
+            )
+            comment_this.save()
+            return HttpResponse(json.dumps({"result": "yes", "commenter": commenter_id}))
+        else:
+            # 回复的
+            comment_target = Comment.objects.filter(article_id=article_id)
+            # 查询id
+            comment_target_name = comment_target[0].article_id
+            comment_text += "\n"+"{0} 回复 {1}".format(commenter_id, comment_target_name)
+            comment_this = Comment(
+                comment_text, commenter_id, article_id,
+            )
+            comment_this.save()  # 加入到数据库当中去
+
+            return JsonResponse({"result": "yes", "commenter": commenter_id})
+    return JsonResponse({"result": "no"})
 
 
 def show_user_comment(request):

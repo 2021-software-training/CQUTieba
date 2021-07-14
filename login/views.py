@@ -63,3 +63,11 @@ def login(request):
 def return_json(request):
     data = {"judge": 'yes'}
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+def face_recognition(request):
+    """
+
+    :param request:
+    :return:
+    """

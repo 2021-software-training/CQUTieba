@@ -26,3 +26,9 @@ def user_authentication(request) -> dict:
         "result": res[0],
         "username": res[1]
     }
+
+
+def get_user_name(article:Article) -> str:
+    my_user_id = article.author_id
+    my_user = MyUser.objects.get(my_user_id=my_user_id)
+    return my_user.user.username

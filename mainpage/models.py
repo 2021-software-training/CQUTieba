@@ -26,7 +26,7 @@ class Article(models.Model):
 
 
 class Comment(models.Model):
-    comment_id = models.PositiveIntegerField(default=0)
+    comment_id = models.PositiveIntegerField(default=0, primary_key=True)
     comment_text = models.TextField(max_length=500)
     commenter_id = models.PositiveIntegerField()
     article_id = models.PositiveIntegerField()
