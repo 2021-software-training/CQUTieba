@@ -77,7 +77,7 @@ def face_search(image):
     """
     人脸查询
     :param image: 图片URL
-    :return:
+    :return: 搜索结果, 若搜索到则返回用户ID, 未搜索到返回0
     """
     request_url = "https://aip.baidubce.com/rest/2.0/face/v3/search"
     params = {
@@ -103,5 +103,7 @@ def face_search(image):
     #       "user_info": 用户信息
     #       "score": 匹配得分
     #     }]
+    result = 0
     if response.json()['user_list'][0]["score"] > 85:
-        return response.json()['user_list'][0]["user_id"]
+        result = response.json()['user_list'][0]["user_id"]
+    return result
