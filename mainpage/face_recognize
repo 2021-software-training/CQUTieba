@@ -1,0 +1,30 @@
+from django.http import HttpResponse
+from datetime import datetime
+
+from django.utils.baseconv import base64
+import json
+
+
+def get_face(request):
+    if request.POST:
+        time = datetime.datetime.now().strftime('%Y%m%d&%H%M%S')
+        str_name = request.POST['message']
+        img_data = base64.b64decode(str_name)
+        try:
+            file = open(u'static/face_data/confirm/' + time + '.jpg', 'wb')
+            file.write(img_data)
+            file.close()
+        except:
+            print('as')
+        res = AFRTest.checkFace(u'static/face_data/base/test.jpg', u'static/face_data/confirm/' + time + '.jpg')
+        if res >= 0.6:
+            return HttpResponse('panel')
+        else:
+            return HttpResponse('no')
+    else:
+        return HttpResponse('no')
+
+
+def face(request):
+    res = AFRTest.checkFace(u'static/face_data/base/test.jpg', u'static/face_data/base/test.jpg')
+    return HttpResponse(res)
