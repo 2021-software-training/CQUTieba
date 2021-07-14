@@ -4,9 +4,11 @@ from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 
-from mainpage.models import Article, Comment, LikeList
+from mainpage.models import Article, Comment, LikeList, Image
 from login.models import MyUser, NumCounter
+from image.models import Image
 from mainpage.utils import user_authentication
+from image import show_img
 
 
 def get_userinfo(request):
@@ -41,7 +43,7 @@ def get_userinfo(request):
             data["signature"] = my_user.signature
             data["expValue"] = my_user.exp_value
             data["fontSize"] = my_user.font_size
-            data["profile"] = my_user.profile
+            data["profile"] = show_img(my_user.profile)
         except MyUser.DoesNotExist:
             data = {"result": "no"}
 
@@ -96,8 +98,6 @@ def edit_userinfo(request):
             data["expValue"] = new_exp_value
             new_font_size = request.GET['fontSize']
             data["fontSize"] = new_font_size
-            new_profile = request.GET['profile']
-            data["profile"] = new_profile
 
             # 保存新用户信息
             my_user = MyUser(**data)
@@ -106,3 +106,21 @@ def edit_userinfo(request):
             MyUser.objects.get(user__username=my_old_username).delete()
 
         return JsonResponse(data=data)
+
+
+def edit_profile(request):
+    """
+    更改头像
+    :param request: 用户ID, 图片文件
+    :return:
+    """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    if request.method == 'GET':
+        image = Image(img=request.FILES.get('profile'))
+        image.save()
+        MyUser.objects.get(user_id=request.GET['userID']).update(profile=image.id)
+    return JsonResponse(data={"result": "upload success"})
