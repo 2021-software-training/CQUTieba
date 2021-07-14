@@ -8,7 +8,9 @@ class MyUser(models.Model):
     
     age = models.PositiveSmallIntegerField(default=0)
     gender = models.PositiveSmallIntegerField(default=0)    # 1: 男性，2：女性，0：未设定
-    photo_url = models.ImageField(blank=True)
+
+    # profile = models.FileField(upload_to="profile", blank=True)
+    profile = models.IntegerField(default=0)    # 保存图片ID
 
     address_provinces = models.CharField(blank=True, max_length=10)
     address_city = models.CharField(blank=True, max_length=10)
@@ -34,4 +36,3 @@ class NumCounter(models.Model):
 
     def __str__(self):
         return str(self.counter_id)
-    
