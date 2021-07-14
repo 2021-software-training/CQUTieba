@@ -1,4 +1,5 @@
 from django.http import HttpResponse, JsonResponse
+
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models import Q
@@ -84,7 +85,35 @@ def show_an_article(request):
         return HttpResponse(json.dumps({"result": "not GET"}), 'application/json')
 
 
+def edit_article(request):
+    """
+    :param request:
+    :return:
+    """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    article_id = request.GET["articleID"]
+
+    article = Article(
+        author_id=request.GET['authorID'],
+        article_text=request.GET['articleText'],
+        article_audio="",
+        article_title=request.GET['articleTitle'],
+        article_type1=request.GET['articleType1'],
+        article_type2=request.GET['articleType2'],
+        article_type3=request.GET['articleType3'],
+    )
+
+    return JsonResponse(data={'result': "success"})
+
+
 def judge_similarity(request):  # 根据用户喜好来设置随机值的范围，从而实现按用户兴趣推荐
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         my_user_id = request.GET['userID']
         user = MyUser.objects.get(pk=my_user_id)
@@ -106,6 +135,11 @@ def judge_similarity(request):  # 根据用户喜好来设置随机值的范围�
 
 
 def recommend(article_id):
+    """
+    求推荐的权重值
+    :param article_id: {article_views,likes_num,comments_num,now_datetime,article_time}
+    :return: {result:"yes"/"no"}
+    """
     article = Article.objects.get(article_id)
     article_views = article.article_views
     likes_num = article.likes_num
@@ -198,3 +232,4 @@ def show_user_all_articles(request):
         temp['articleType3'] = x.article_type3
         articles_data.append(temp)
     return JsonResponse(data=articles_data, safe=False)
+
