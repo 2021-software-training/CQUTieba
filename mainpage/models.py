@@ -26,6 +26,7 @@ class Article(models.Model):
 
 
 class Comment(models.Model):
+    comment_id = models.PositiveIntegerField(default=0, primary_key=True)
     comment_text = models.TextField(max_length=500)
     commenter_id = models.PositiveIntegerField()
     article_id = models.PositiveIntegerField()
@@ -49,3 +50,14 @@ class LikeList(models.Model):
 
     def __str__(self):
         return str(self.article_id) + ": " + str(self.user_id)
+
+
+class LikeListComment(models.Model):
+    """
+    用于存储 文章 <--> 点赞用户id，用于判断是否改文章是否被访问用户点赞过
+    """
+    comment_id = models.IntegerField()
+    user_id = models.IntegerField()
+
+    def __str__(self):
+        return str(self.comment_id) + ": " + str(self.user_id)
