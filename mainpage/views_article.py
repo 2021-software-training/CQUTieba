@@ -24,6 +24,7 @@ def add_article(request):
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
+    
     if request.method == "GET":
         counter = NumCounter.objects.get(pk=1)
         article = Article(
