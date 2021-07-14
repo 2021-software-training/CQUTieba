@@ -1,7 +1,9 @@
 from django.http import HttpResponse, JsonResponse
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
-from django.db.models.query import QuerySet
+from django.db.models import Q
+from mainpage.utils import user_authentication
+from datetime import datetime
 import json
 import random
 import math
@@ -17,6 +19,10 @@ def add_article(request):
         }
     :return: json形式的 {result: "yes"/"no"}
     """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         counter = NumCounter.objects.get(pk=1)
         article = Article(
@@ -36,6 +42,10 @@ def add_article(request):
 
 
 def show_an_article(request):
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
     if request.method == "GET":
         article_id = int(request.GET["articleID"])
         try:
@@ -100,13 +110,15 @@ def recommend(article_id):
     article_views = article.article_views
     likes_num = article.likes_num
     comments_num = article.comments_num
+    now_datetime = datetime.now()
     article_time = article.article_time
+    age = (now_datetime-article_time).days
     # if article_time <= 24:  # 对重力因子的值也根据发布时间设置一个大小
     #    i = 1
     # else:
     #   i = 1 + (article_time - 24) // 24
 
-    a = math.ceil(article_time)  # 对age向上取整
+    a = math.ceil(age)  # 对age向上取整
     s = 0.14 * 1 / 1000 * article_views + 0.24 * 1 / 15 * likes_num + 0.62 * comments_num  # 分子
     if s != 0:
         w = s * judge_similarity() / a
@@ -115,7 +127,7 @@ def recommend(article_id):
     return w  # 返回权重值
 
 
-def show_all_articles(request):
+def show_page_all_articles(request):
     """
     展示所有文章
     :param request {
@@ -123,8 +135,17 @@ def show_all_articles(request):
     }:
     :return:
     """
-    if request.method == "GET":
-        article_id = int(request.GET["articleID"])
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    articles_type = request.GET["type"]
+    if articles_type != "all":
+        articles_temp = Article.objects.filter(
+            Q(article_type1=articles_type) | Q(article_type2=articles_type) | Q(article_type3=articles_type)
+        )
+        articles = articles_temp.order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
+    else:
         articles = Article.objects.all().order_by('-article_time', '-likes_num', '-comments_num', '-article_views')
 
         articles_data = []
@@ -145,7 +166,7 @@ def show_all_articles(request):
         return JsonResponse(data=articles_data, safe=False)
 
 
-def show_user_article(request):
+def show_user_all_article(request):
     """
     获得指定用户的历史文章，并将文章放入列表之中[article1, article2, ....]
     article为dict <--> json
@@ -155,6 +176,13 @@ def show_user_article(request):
         }:
     :return [article1, article2, ....]:
     """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    username = res["username"]
+    user = MyUser.objects.get(user__username=username)
+
     articles = Article.objects.filter(author_id=request.GET['authorID']) \
         .order_by('-article_time')
     articles_data = []
