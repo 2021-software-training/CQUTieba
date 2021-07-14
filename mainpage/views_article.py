@@ -112,7 +112,7 @@ def recommend(article_id):
     comments_num = article.comments_num
     now_datetime = datetime.now()
     article_time = article.article_time
-    age = (now_datetime-article_time).days
+    age = (now_datetime - article_time).hours  # 以小时为单位计算文章发布时间
     # if article_time <= 24:  # 对重力因子的值也根据发布时间设置一个大小
     #    i = 1
     # else:
@@ -166,7 +166,7 @@ def show_page_all_articles(request):
         return JsonResponse(data=articles_data, safe=False)
 
 
-def show_user_all_article(request):
+def show_user_all_articles(request):
     """
     获得指定用户的历史文章，并将文章放入列表之中[article1, article2, ....]
     article为dict <--> json
