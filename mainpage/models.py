@@ -41,7 +41,7 @@ class Comment(models.Model):
 
 class LikeList(models.Model):
     """
-    用于存储 文章 <--> 点赞用户id，用于判断是否改文章是否被访问用户点赞过
+    用于存储 文章 <--> 点赞用户id，用于判断该文章是否被访问用户点赞过
     """
     article_id = models.IntegerField()
     user_id = models.IntegerField()
@@ -50,13 +50,23 @@ class LikeList(models.Model):
         return str(self.article_id) + ": " + str(self.user_id)
 
 
+class LikeListComment(models.Model):
+    """
+    用于存储 评论 <--> 点赞用户id，用于判断该评论是否被访问用户点赞过
+    """
+    comment_id = models.IntegerField()
+    user_id = models.IntegerField()
+
+    def __str__(self):
+        return str(self.comment_id) + ": " + str(self.user_id)
+
+
 class Image(models.Model):
     """
     用于存储图片
     """
     id = models.AutoField(primary_key=True)
     img = models.ImageField(upload_to='img', blank=False)
-    name = models.CharField(max_length=32, blank=True)
 
     def __str__(self):
         return str(self.id)
