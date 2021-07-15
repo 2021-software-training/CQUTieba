@@ -4,7 +4,7 @@ AC自动机，对文章进行检索
 '''
 
 # python3
-from utils import cut
+from search.utils import cut
 
 class Node(object):
     """
@@ -49,6 +49,7 @@ class AhoCorasick(object):
         self._node_all=[(0,self._root)]
         _a={}
         self.num={} #储存着每个单词的出现日志数目
+        self.isin = 0
         for word in self.words:
             self.num[word] = 0
             for w in word:
@@ -118,11 +119,12 @@ class AhoCorasick(object):
                             result.add(keyword)
                         else:
                             self.num[keyword] += 1
+                            self.isin += 1
                     node=node[i]
                     break
             index+=1
         return result
 if __name__=='__main__':
-    ac=AhoCorasick(["你好世界","我在这里","你好吗","中"])
+    ac=AhoCorasick(["小行星"])
     ac.search("你好世界，我在这里，你好世界,中国天文台",True)
     print(ac.num)

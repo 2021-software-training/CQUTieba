@@ -12,10 +12,14 @@ def Article_search(request):
         targets = Article.objects.all()
         temp,j = [],1
         for i in targets:
-            ac.search(i.article_title)
-            if(ac.num):
-                temp.append(i)
-        return JsonResponse(temp,safe=False)
+            ac.isin = 0
+            temp_1 = {}
+            ac.search(i.article_title,True)
+            if(ac.isin):
+                temp_1['article{0}'.format(j)] = i.article_title
+                temp.append(temp_1)
+                j += 1
+        return JsonResponse(temp,safe=False,json_dumps_params={'ensure_ascii': False})
 
 
 
