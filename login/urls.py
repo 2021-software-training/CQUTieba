@@ -3,8 +3,8 @@ from . import views
 
 urlpatterns = [
     path('', views.return_json, name='return_json'),
+
     path('login', views.login, name='login'),
-    path('regist', views.register, name='email_sender'),
-    path('testget', views.func1, name='func1'),
-    path('testpost', views.func2, name='func1')
+    path('register', views.register, name='register'),
+    path('search_user',views.user_search,name='search_user')
 ]
