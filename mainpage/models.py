@@ -11,7 +11,7 @@ class Article(models.Model):
     article_views = models.IntegerField(default=0)
     article_time = models.DateTimeField(auto_now_add=True)
 
-    article_audio = models.FileField(blank=True)
+    article_audio = models.IntegerField(default=-1)  # 保存audioID
     article_title = models.CharField(max_length=15)
 
     likes_num = models.PositiveIntegerField(default=0)
@@ -31,7 +31,6 @@ class Comment(models.Model):
     commenter_id = models.PositiveIntegerField()
     article_id = models.PositiveIntegerField()
     likes_num = models.PositiveIntegerField(default=0)
-    comment_audio = models.FileField(blank=True)
     comment_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -69,6 +68,17 @@ class Image(models.Model):
     """
     id = models.AutoField(primary_key=True)
     img = models.ImageField(upload_to='img', blank=False)
+
+    def __str__(self):
+        return str(self.id)
+
+
+class Audio(models.Model):
+    """
+    用于存储MP3文件
+    """
+    id = models.AutoField(primary_key=True)
+    audio = models.FileField(upload_to='audio', blank=False)
 
     def __str__(self):
         return str(self.id)

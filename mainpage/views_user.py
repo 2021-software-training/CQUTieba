@@ -53,53 +53,19 @@ def edit_userinfo(request):
     :return:
     """
     res = user_authentication(request)
-    print(res)
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
-    if request.method == "GET":
-        my_old_username = request.GET['oldUsername']
-        my_new_username = request.GET['newUsername']
-        data = {}
-        try:
-            # 新用户名已经存在
-            my_user = MyUser.objects.get(user__username=my_new_username)
-            data = {"result": "no"}
-        except MyUser.DoesNotExist:
-            # 新用户名不存在
-            data["username"] = my_new_username
+    username = res['username']
+    user = MyUser.objects.get(user__username=username)
 
-            new_email = request.GET['email']
-            data["email"] = new_email
-            new_gender = request.GET['gender']
-            data["gender"] = new_gender
-            new_age = request.GET['age']
-            data["age"] = new_age
-            new_address_provinces = request.GET['addressProvinces']
-            data["addressProvinces"] = new_address_provinces
-            new_address_city = request.GET['addressCity']
-            data["addressCity"] = new_address_city
-
-            new_habits1 = request.GET['habits1']
-            data["habits1"] = new_habits1
-            new_habits2 = request.GET['habits2']
-            data["habits2"] = new_habits2
-            new_habits3 = request.GET['habits3']
-            data["habits3"] = new_habits3
-            new_signature = request.GET['signature']
-            data["signature"] = new_signature
-            new_exp_value = request.GET['expValue']
-            data["expValue"] = new_exp_value
-            new_font_size = request.GET['fontSize']
-            data["fontSize"] = new_font_size
-
-            # 保存新用户信息
-            my_user = MyUser(**data)
-            my_user.save()
-            # 删除旧用户信息
-            MyUser.objects.get(user__username=my_old_username).delete()
-
-        return JsonResponse(data=data)
+    user.gender = int(request.GET['gender'])
+    user.age = request.GET['age']
+    user.address_provinces = request.GET['addressProvinces']
+    user.address_city = request.GET['addressCity']
+    user.signature = request.GET['signature']
+    user.save()
+    return JsonResponse({"result": "yes"})
 
 
 def edit_profile(request):
@@ -113,8 +79,12 @@ def edit_profile(request):
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
-    if request.method == 'GET':
-        image = Image(img=request.FILES.get('profile'))
-        image.save()
-        MyUser.objects.get(user_id=request.GET['userID']).update(profile=image.id)
+    # if request.method == 'GET':
+    print(request.FILES)
+    image = Image(img=request.FILES.get('profile'))
+    image.save()
+    username = res["username"]
+    user = MyUser.objects.get(user__username=username)
+    user.profile = image.id
+    user.save()
     return JsonResponse(data={"result": "upload success"})
