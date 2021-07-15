@@ -22,13 +22,15 @@ def add_article(request):
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
+    username = res["username"]
+    user = MyUser.objects.get(user__username=username)
+
     if request.method == "GET":
         counter = NumCounter.objects.get(pk=1)
         article = Article(
             article_id=counter.my_article_id,
-            author_id=request.GET['authorID'],
+            author_id=user.my_user_id,
             article_text=request.GET['articleText'],
-            article_audio="",
             article_title=request.GET['articleTitle'],
             article_type1=request.GET['articleType1'],
             article_type2=request.GET['articleType2'],

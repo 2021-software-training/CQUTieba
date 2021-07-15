@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from login.models import MyUser, NumCounter
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from login.utils import user_check
 import json
 
@@ -8,6 +8,9 @@ from login.token import check_token, create_token
 
 
 # Create your views here.
+from mainpage.utils import user_authentication
+
+
 def register(request):
     print(1)
     if request.method == "GET":
@@ -63,6 +66,30 @@ def login(request):
 def return_json(request):
     data = {"judge": 'yes'}
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+def update_password(request):
+    """
+    更新密码
+    :param request:
+    :return:
+    """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    username = res['username']
+    user = MyUser.objects.get(user__username=username)
+
+    old_password = request.GET["oldPassword"]
+    new_password = request.GET["newPassword"]
+    if user_check(name=username, ps=old_password):
+        user.user.set_password(new_password)
+        user.user.save()
+        user.save()
+        return JsonResponse({"result": "yes"})
+
+    return JsonResponse({"result": "no"})
 
 
 def face_recognition(request):

@@ -9,7 +9,6 @@ class MyUser(models.Model):
     
     age = models.PositiveSmallIntegerField(default=0)
     gender = models.PositiveSmallIntegerField(default=0)    # 1: 男性，2：女性，0：未设定
-    photo_url = models.ImageField(blank=True)
 
     address_provinces = models.CharField(blank=True, max_length=10)
     address_city = models.CharField(blank=True, max_length=10)
@@ -23,6 +22,12 @@ class MyUser(models.Model):
     exp_value = models.PositiveIntegerField(default=1)
 
     front_size = models.IntegerField(default=10)
+    profile = models.IntegerField(default=0)  # 保存图片ID
+
+    audio_speed = models.IntegerField(default=5)
+    audio_pitch = models.IntegerField(default=5)
+    audio_volume = models.IntegerField(default=5)
+    audio_person = models.IntegerField(default=3)
 
     def __str__(self):
         return self.user.username

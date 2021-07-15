@@ -110,14 +110,16 @@ def show_user_comment(request):
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
-    comments = Comment.objects.filter(commenter_id=request.GET['commenterID']).order_by('-comment_time')
+    username = res["username"]
+    user = MyUser.objects.get(user__username=username)
+    user_id = user.my_user_id
+    comments = Comment.objects.filter(commenter_id=user_id).order_by('-comment_time')
     comments_data = []
     for x in comments:
         temp_c = dict()
         temp_c['commentText'] = x.comment_text
         temp_c['commentID'] = x.comment_id
         temp_c['commentLikesNum'] = x.likes_num
-        temp_c['commentAudio'] = x.comment_audio
         temp_c['commentTime'] = x.comment_time
         a = Article.objects.get(article_id=x.article_id)
         temp_a = dict()
@@ -136,6 +138,7 @@ def show_user_comment(request):
         temp['article'] = temp_a
         comments_data.append(temp)
 
+    print(comments_data)
     return JsonResponse(data=comments_data, safe=False)
 
 

@@ -1,9 +1,10 @@
 import json
 from django.http import HttpResponse, JsonResponse
-from mainpage.models import Article, Comment, LikeList, LikeListComment
+from mainpage.models import Article, Comment, LikeList, LikeListComment, Image, Audio
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
 from mainpage.utils import user_authentication
+from mainpage.text_to_audio import create_MP3
 
 
 def add_like_article(request):
@@ -82,3 +83,15 @@ def add_like_comment(request):
             comment.save()
 
     return JsonResponse(data={"result": 1})
+
+
+def get_image(request, username):
+    user = MyUser.objects.get(user__username=username)
+    img_id = user.profile
+
+    img = Image.objects.get(pk=img_id)
+    image_path = str(img.img)
+    img_data = open(image_path, 'rb').read()
+    return HttpResponse(img_data, content_type='image/jpg')
+
+
