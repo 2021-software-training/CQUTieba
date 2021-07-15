@@ -4,6 +4,8 @@
 2.分词，并可以从中去掉所有的标点符号
 '''
 import jieba as jb
+from jieba import analyse
+from math import exp
 def lcs(str1,str2):
     '''
     :param str1:用户输入的字符串
@@ -45,3 +47,14 @@ def cut(text):
         if i in punctuation_str:
             cutten.remove(i)
     return cutten
+def get_weight_and_keyword(text):
+    tfidf=analyse.extract_tags
+    keywords=tfidf(text,topK=10,withWeight=True)
+    weight,words = [],[]
+    if(len(text)==1):
+        weight= [1.0]
+        words.append(text)
+    for i in keywords:
+        words.append(i[0])
+        weight.append(i[1])
+    return words,weight

@@ -49,7 +49,8 @@ class AhoCorasick(object):
         self._node_all=[(0,self._root)]
         _a={}
         self.num={} #储存着每个单词的出现日志数目
-        self.isin = 0
+        self.isin = 1 #判定是否完成了全覆盖
+        self.hit_num = 0
         for word in self.words:
             self.num[word] = 0
             for w in word:
@@ -101,7 +102,6 @@ class AhoCorasick(object):
                             break
                         else:
                             _node=_node.fail
-
     def search(self,content,with_index=False):
         result=set()
         node=self._root
@@ -119,12 +119,20 @@ class AhoCorasick(object):
                             result.add(keyword)
                         else:
                             self.num[keyword] += 1
-                            self.isin += 1
                     node=node[i]
                     break
             index+=1
+        for i in self.num.values():
+            self.isin = self.isin and bool(i)
+            self.hit_num += i
         return result
+
+    def clear(self):#清除字典里面的记录
+        for i in self.num.keys():
+            self.num[i] = 0
 if __name__=='__main__':
-    ac=AhoCorasick(["小行星"])
+    ac=AhoCorasick(["天文台"])
     ac.search("你好世界，我在这里，你好世界,中国天文台",True)
     print(ac.num)
+    print(ac.isin)
+    print(ac.hit_num)
