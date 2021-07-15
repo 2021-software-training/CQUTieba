@@ -56,7 +56,7 @@ def show_article_comment(request):
         u = MyUser.objects.get(my_user_id=x.commenter_id)
         temp_u = dict()
         temp_u['userID'] = u.my_user_id
-        temp_u['username'] = u.username
+        temp_u['username'] = u.user.username
         temp_u['profile'] = u.profile
         temp = dict()
         temp['comment'] = temp_c
