@@ -61,3 +61,14 @@ class LikeListComment(models.Model):
 
     def __str__(self):
         return str(self.comment_id) + ": " + str(self.user_id)
+
+
+class Image(models.Model):
+    """
+    用于存储图片
+    """
+    id = models.AutoField(primary_key=True)
+    img = models.ImageField(upload_to='img', blank=False)
+
+    def __str__(self):
+        return str(self.id)

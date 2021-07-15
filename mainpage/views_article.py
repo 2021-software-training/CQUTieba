@@ -3,6 +3,7 @@ from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
 from mainpage.utils import user_authentication, get_user_name
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 import json
 
@@ -72,7 +73,7 @@ def show_an_article(request):
     if request.method == "GET":
         article_id = int(request.GET["articleID"])
         try:
-            article = Article.objects.get(pk=article_id)
+            article = get_object_or_404(Article, pk=article_id)
             author_id = article.author_id
             user = MyUser.objects.get(my_user_id=author_id)
 

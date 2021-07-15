@@ -1,6 +1,6 @@
 import json
 from django.http import HttpResponse, JsonResponse
-from mainpage.models import Article, Comment, LikeList
+from mainpage.models import Article, Comment, LikeList, LikeListComment
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
 from mainpage.utils import user_authentication
@@ -46,7 +46,39 @@ def add_like_article(request):
 
 def add_like_comment(request):
     """
-    添加用户对评论的点赞
-    :param request:
-    :return:
+    对指定评论添加点赞数，并操控LikeList表，添加一对 评论 <-> 用户 点赞关联
+    :param request: {
+        commentID, userID
+        }
+    :return void:
     """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    if request.method == "GET":
+        like_comment_id = request.GET['commentID']
+        username = res["username"]
+        user = MyUser.objects.get(user__username=username)
+        like_user_id = user.my_user_id
+        try:
+            # 该用户点赞过该评论, 撤销点赞, 删除点赞关联
+            LikeListComment.objects.get(comment_id=like_comment_id, user_id=like_user_id).delete()
+            comment = Comment.objects.get(comment_id=like_comment_id)
+            comment.likes_num -= 1
+            comment.save()
+            return JsonResponse({"result": "yes"})
+
+        except LikeList.DoesNotExist:
+            # 该用户未点赞该评论, 进行点赞, 增加点赞关联
+            new_like = LikeListComment(
+                comment_id=like_comment_id,
+                user_id=like_user_id,
+            )
+            new_like.save()
+            comment = Comment.objects.get(comment_id=like_comment_id)
+            comment.likes_num += 1
+            comment.save()
+
+    return JsonResponse(data={"result": 1})

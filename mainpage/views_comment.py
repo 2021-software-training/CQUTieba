@@ -26,7 +26,7 @@ def add_comment(request):
         if comment_target:
             # 查询id
             comment_target_name = comment_target[0].author_id
-            comment_text += "\n"+"{0} 评论 {1}".format(commenter_id, comment_target_name)
+            comment_text += "\n" + "{0} 评论 {1}".format(commenter_id, comment_target_name)
             comment_this = Comment(
                 comment_text=comment_text,
                 commenter_id=commenter_id,
@@ -39,7 +39,7 @@ def add_comment(request):
             comment_target = Comment.objects.filter(article_id=article_id)
             # 查询id
             comment_target_name = comment_target[0].article_id
-            comment_text += "\n"+"{0} 回复 {1}".format(commenter_id, comment_target_name)
+            comment_text += "\n" + "{0} 回复 {1}".format(commenter_id, comment_target_name)
             comment_this = Comment(
                 comment_text, commenter_id, article_id,
             )
@@ -47,6 +47,44 @@ def add_comment(request):
 
             return JsonResponse({"result": "yes", "commenter": commenter_id})
     return JsonResponse({"result": "no"})
+
+
+def add_article_comment(request):
+    """
+    用于添加article的comment
+    :param request: {
+        articleID: article_id,
+        commentText: comment_text
+    }
+    :return:
+    """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    username = res["username"]
+    my_user = MyUser.objects.get(user__username=username)
+
+    comment_text = request.GET["commentText"]
+    if len(comment_text) > 500:
+        comment_text = comment_text[:500-1]
+
+    counter = NumCounter.objects.get(pk=1)
+    comment_id = counter.my_comment_id
+
+    comment = Comment(
+        comment_id=comment_id,
+        comment_text=comment_text,
+        commenter_id=my_user.my_user_id,
+        article_id=request.GET["articleID"]
+    )
+    comment.save()
+    counter.my_comment_id += 1
+    counter.save()
+
+    article = Article.objects.get(pk=request.GET["articleID"])
+    article.comments_num += 1
+    article.save()
 
 
 def show_user_comment(request):
@@ -84,7 +122,11 @@ def show_user_comment(request):
         a = Article.objects.get(article_id=x.article_id)
         temp_a = dict()
         temp_a['articleID'] = a.article_id
-        temp_a['articleTime'] = a.article_time
+        temp_a['articleTime'] = ("{:}年{:}月{:}日".format(
+                str(a.article_time.year),
+                str(a.article_time.month),
+                str(a.article_time.day)
+            ))
         temp_a['articleTitle'] = a.article_title
         temp_a['articleType1'] = a.article_type1
         temp_a['articleType2'] = a.article_type2
@@ -94,6 +136,55 @@ def show_user_comment(request):
         temp['article'] = temp_a
         comments_data.append(temp)
 
+    return JsonResponse(data=comments_data, safe=False)
+
+
+def show_article_comment(request):
+    """
+    获得指定文章的历史评论，并将评论放入列表之中[message1, message2, ....]（时间顺序）
+    message dict <--> json
+    包括评论的id，评论时间time, 评论的内容, 用户ID, 用户名username, 用户头像profile
+    :param request:
+    message {
+        comment {
+            commentID.....
+            commentText....
+        },
+        user {
+            ID....
+            name.....
+        }
+    }
+    :return: [message1, message2, .....]
+    """
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    comments = Comment.objects.filter(article_id=request.GET['articleID']).order_by('-comment_time')
+    comments_data = []
+    for x in comments:
+        temp_c = dict()
+        temp_c['commentText'] = x.comment_text
+        temp_c['commentID'] = x.comment_id
+        temp_c['commentLikesNum'] = x.likes_num
+        # temp_c['commentAudio'] = x.comment_audio
+        temp_c['commentTime'] = ("{:}年{:}月{:}日".format(
+                str(x.comment_time.year),
+                str(x.comment_time.month),
+                str(x.comment_time.day)
+            ))
+        u = MyUser.objects.get(my_user_id=x.commenter_id)
+        temp_u = dict()
+        temp_u['userID'] = u.my_user_id
+        temp_u['username'] = u.user.username
+        # temp_u['profile'] = u.profile
+        temp = dict()
+        temp['comment'] = temp_c
+        temp['user'] = temp_u
+        comments_data.append(temp)
+    print(comments_data)
     return JsonResponse(data=comments_data, safe=False)
 
 

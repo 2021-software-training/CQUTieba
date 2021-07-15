@@ -8,7 +8,7 @@ urlpatterns = [
     path('showPageAllArticles', views_article.show_page_all_articles, name='show an article'),
     path('showUserAllArticles', views_article.show_user_all_articles, name='shou all article'),
 
-    path('addComment', views_comment.add_comment, name='add comment'),
+    path('addArticleComment', views_comment.add_article_comment, name='add article comment'),
     path('editComment', views_comment.edit_comment, name='edit comment'),
     path('showAllComment', views_comment.show_user_comment, name='show all comment'),
 
@@ -17,5 +17,7 @@ urlpatterns = [
 
 
     path('addLikeArticle', views_other.add_like_article, name='add like article'),
-    path('addLikeComment', views_other.add_like_comment, name='add like comment')
+    path('addLikeComment', views_other.add_like_comment, name='add like comment'),
+    path('getAnArticleComment', views_comment.show_article_comment, name='show article comment'),
+    path('editProfile', views_article.edit_profile, name='edit profile')
 ]
