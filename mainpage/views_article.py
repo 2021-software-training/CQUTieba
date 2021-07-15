@@ -1,10 +1,10 @@
 from django.http import HttpResponse, JsonResponse
-
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models import Q
 from mainpage.utils import user_authentication
-from datetime import datetime
+
+import datetime
 import json
 import random
 import math
@@ -144,7 +144,7 @@ def recommend(article_id):
     article_views = article.article_views
     likes_num = article.likes_num
     comments_num = article.comments_num
-    now_datetime = datetime.now()
+    now_datetime = datetime.datetime.now()
     article_time = article.article_time
     age = (now_datetime - article_time).hours  # 以小时为单位计算文章发布时间
     # if article_time <= 24:  # 对重力因子的值也根据发布时间设置一个大小
@@ -155,7 +155,7 @@ def recommend(article_id):
     a = math.ceil(age)  # 对age向上取整
     s = 0.14 * 1 / 1000 * article_views + 0.24 * 1 / 15 * likes_num + 0.62 * comments_num  # 分子
     if s != 0:
-        w = s * judge_similarity() / a
+        w = s * judge_similarity(request) / a
     else:
         w = 0
     return w  # 返回权重值
@@ -232,3 +232,4 @@ def show_user_all_articles(request):
         temp['articleType3'] = x.article_type3
         articles_data.append(temp)
     return JsonResponse(data=articles_data, safe=False)
+
