@@ -81,7 +81,7 @@ def edit_profile(request):
 
     # if request.method == 'GET':
     print(request.FILES)
-    image = Image(img=request.FILES.get('profile'))
+    image = Image(img=request.FILES.get('file'))
     image.save()
     username = res["username"]
     user = MyUser.objects.get(user__username=username)

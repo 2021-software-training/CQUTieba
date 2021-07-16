@@ -16,19 +16,22 @@ def register(request):
     if request.method == "GET":
         print(request.GET)
         register_username = request.GET['username']
+        
         try:
             # 用户名已经存在
             MyUser.objects.get(user__username=register_username)
-            return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
+            return HttpResponse(json.dumps({"result": "not"}), content_type='application/json')
         except MyUser.DoesNotExist:
             register_password = request.GET['password']
             register_email = request.GET['email']
             register_age = request.GET['age']
+            register_gender = request.GET['gender']
             # register_sex = request.GET['sex']
             userinfo = {
                 "username": register_username,
                 "password": register_password,
                 "email": register_email,
+                "gender": register_gender
             }
             User.objects.create_user(**userinfo)
             user = User.objects.get(username=register_username)
@@ -98,3 +101,17 @@ def face_recognition(request):
     :param request:
     :return:
     """
+
+
+def user_judge(request):
+    """
+
+    :param request:
+    :return:
+    """
+    username = request.GET['username']
+    try:
+        User.objects.get(username=username)
+        return JsonResponse({"result": "no"})
+    except User.DoesNotExist:
+        return JsonResponse({"result": "yes"})

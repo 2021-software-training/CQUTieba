@@ -57,7 +57,6 @@ def add_like_comment(request):
     print(res)
     if not res["result"]:
         return JsonResponse(data={"result": 0})
-
     if request.method == "GET":
         like_comment_id = request.GET['commentID']
         username = res["username"]
