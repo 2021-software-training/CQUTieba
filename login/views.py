@@ -1,14 +1,24 @@
 from django.contrib.auth.models import User
 from login.models import MyUser, NumCounter
 from django.http import HttpResponse, JsonResponse
-from login.utils import user_check
+from login.utils import user_check, send_register_email
+from django.core.cache import cache
 import json
 
 from login.token import check_token, create_token
 
-
 # Create your views here.
 from mainpage.utils import user_authentication
+
+
+def check_email_help(request):
+    """
+    发送验证码
+    :param request:
+    :return:
+    """
+    send_register_email(request.GET["email"])
+    return JsonResponse({"result": "yes"})
 
 
 def register(request):
@@ -16,12 +26,17 @@ def register(request):
     if request.method == "GET":
         print(request.GET)
         register_username = request.GET['username']
-        
+
         try:
             # 用户名已经存在
             MyUser.objects.get(user__username=register_username)
             return HttpResponse(json.dumps({"result": "not"}), content_type='application/json')
         except MyUser.DoesNotExist:
+
+            code = cache.get(request.GET["email"])
+            if code != request.GET["code"]:
+                return JsonResponse({"result": "no"})
+
             register_password = request.GET['password']
             register_email = request.GET['email']
             register_age = request.GET['age']
@@ -39,8 +54,10 @@ def register(request):
             my_user = MyUser(user=user, age=register_age, my_user_id=counter.my_user_id)
             counter.my_user_id += 1
             user.save()
-            my_user.save()
             counter.save()
+
+            my_user.user.is_active = False
+            my_user.save()
             return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "not json"}), content_type='application/json')
 
@@ -115,3 +132,6 @@ def user_judge(request):
         return JsonResponse({"result": "no"})
     except User.DoesNotExist:
         return JsonResponse({"result": "yes"})
+
+
+

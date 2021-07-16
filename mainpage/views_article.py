@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import HttpResponse, JsonResponse
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
@@ -35,6 +37,7 @@ def add_article(request):
             article_type1=request.GET['articleType1'],
             article_type2=request.GET['articleType2'],
             article_type3=request.GET['articleType3'],
+            article_time=datetime.datetime.now()
         )
         counter.my_article_id += 1
         article.save()
