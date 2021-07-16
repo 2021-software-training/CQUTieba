@@ -2,9 +2,11 @@ from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
 from search.Ahocorasick import *
 from mainpage.models import Article
-from search.utils import cut,get_weight_and_keyword
+from search.utils import cut,get_weight_and_keyword,simhash
 from search.Ahocorasick import AhoCorasick
 from math import log10
+from search.maxheap import *
+from math import sqrt
 # Create your views here.
 def Article_search(request):
     '''
@@ -37,12 +39,18 @@ def Article_search(request):
                 以上为针对标题的进行处理
             '''
             ac.search(i.article_text,True)
-            E_passage = 0#数学期望
+            E_passage = 0
+            E_passage1,E_passage2 = 0,0#向量化
             for i1 in range(len(w)):
-                E_passage += log10(1+w[i1]*ac.num[search_list[i1]])
+                E_passage1 += pow(w[i1]*ac.num[search_list[i1]],2)
+                E_passage2 += w[i1]*ac.num[search_list[i1]]
+            if E_passage1 == 0:
+                E_passage = 0
+            else:
+                E_passage = E_passage2/sqrt(E_passage1)
             if ac.isin == False and E_passage > 0:
                 temp_1['article{0}'.format(j)]=i.article_title
-                temp_1['E_passage']=ac.hit_num
+                temp_1['E_passage']=E_passage
                 temp_1['id']=i.article_id  #找出文章的的id
                 temp1.append(temp_1)
                 j+=1
@@ -56,6 +64,25 @@ def Similar(request):
         return {article1,....,articlen}
         一般来说，推荐出4篇文章即可
     '''
-
+    if request.method == 'GET':
+        mother_article = request.GET['article_text']#根据当前文章text来进行
+        targets = Article.objects.all()#所有的文章的对象
+        max_heap = MaxHeap() #建堆
+        tar = []#列表检索
+        for i in targets:
+            hash1 = simhash(cut(mother_article))
+            hash2 = simhash(cut(i.article_text))
+            k = hash1.similarity(hash2)#计算相似度
+            a = cosine_text(i.article_id,k)
+            tar.append(a)
+        max_heap.heapify(tar)
+        temp = []
+        for i in range(4):
+            _id = max_heap.pop().id
+            target = Article.objects.filter(article_id=_id)
+            temp_1 = dict()
+            temp_1['article{0}'.format(i)] = target[0].article_id
+            temp.append(temp_1)
+        return JsonResponse(temp,safe=False)
     return True
 
