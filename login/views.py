@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from login.utils import user_check, send_register_email
 from django.core.cache import cache
 import json
+from login.face import face_register
 
 from login.token import check_token, create_token
 
@@ -138,3 +139,19 @@ def test(request):
     if request.method == 'POST':
         print(json.loads(request.body))
         return JsonResponse(data={"result": "yes"})
+
+
+def to_face_register(request):
+    """
+
+    :param request:
+    :return:
+    """
+    image = request.GET["image"]
+    user_name = request.GET["username"]
+    return face_register(image, user_name)
+
+
+def to_face_login(request):
+    image = request.GET["image"]
+    user_name = request.GET["username"]

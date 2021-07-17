@@ -9,5 +9,6 @@ urlpatterns = [
     path('update', views.update_password, name='update password'),
     path('judge', views.user_judge, name='user judge'),
     path('emailCheck', views.check_email_help, name='check email'),
-    path('test', views.test, name='test')
+    path('test', views.test, name='test'),
+    path('registerFace', views.to_face_register, name='face register')
 ]

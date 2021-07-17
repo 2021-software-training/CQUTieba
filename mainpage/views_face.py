@@ -1,11 +1,8 @@
 import json
 
-from django.core.files import File
-from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q
 from mainpage.utils import user_authentication
-from face import face_register, face_update, face_search
+from login.face import face_register, face_update, face_search
 
 
 def register_face(request):

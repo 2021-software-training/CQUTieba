@@ -28,5 +28,6 @@ urlpatterns = [
     path('editAudio', views_audio.edit_audio, name='edit audio'),
     path('getAudioInfo', views_audio.get_audio_info, name='get audio'),
 
-    path('deleteArticle', views_article.delete_article, name='delete article')
+    path('deleteArticle', views_article.delete_article, name='delete article'),
+    path('deleteComment', views_other.delete_comment, name='delete comment')
 ]

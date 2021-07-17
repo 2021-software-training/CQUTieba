@@ -94,3 +94,12 @@ def get_image(request, username):
     return HttpResponse(img_data, content_type='image/jpg')
 
 
+def delete_comment(request):
+    res = user_authentication(request)
+    print(res)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    comment = Comment.objects.get(comment_id=request.GET["commentID"])
+    comment.delete()
+    return JsonResponse({"result": "yes"})
