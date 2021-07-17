@@ -54,16 +54,16 @@ def recommend_get_weight(article: Article, user: MyUser):
     time_edit = article.article_time
     differ_time = 365*(time_now.year - time_edit.year) + 30*(time_now.month - time_edit.month) + (time_now.day-time_edit.day)
 
-    theta_low = 0.6
-    theta_high = 0.9
+    theta_low = 0.4
+    theta_high = 1
     if user.habits1 == article.article_type1 or user.habits2 == article.article_type2 or user.habits3 == article.article_type3:
-        theta_low = 0.8
+        theta_low = 0.6
         theta_high = 1.2
     elif user.habits1 == article.article_type1 or user.habits2 == article.article_type2 or user.habits3 == article.article_type3:
-        theta_low = 0.8
+        theta_low = 0.6
         theta_high = 1.2
     elif user.habits1 == article.article_type1 or user.habits2 == article.article_type2 or user.habits3 == article.article_type3:
-        theta_low = 0.8
+        theta_low = 0.6
         theta_high = 1.2
     theta = random.uniform(theta_low, theta_high)
 
