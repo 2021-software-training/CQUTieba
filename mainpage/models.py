@@ -1,12 +1,10 @@
+import django.utils.timezone
 from django.db import models
-from login.models import MyUser
 # Create your models here.
 from mainpage.audio import *
-from django.utils import timezone
 from django.db import models
-from login.models import MyUser
 # Create your models here.
-
+from django.utils import timezone as django_tz
 
 class Article(models.Model):
     article_id = models.PositiveIntegerField(primary_key=True)
@@ -14,7 +12,7 @@ class Article(models.Model):
 
     article_text = models.TextField(max_length=20000)
     article_views = models.IntegerField(default=0)
-    article_time = models.DateTimeField(auto_now_add=True)
+    article_time = models.DateTimeField(default=django_tz.now)
 
     article_audio = models.FileField(blank=True)
     article_title = models.CharField(max_length=15)
@@ -26,8 +24,13 @@ class Article(models.Model):
     article_type2 = models.CharField(blank=True, max_length=10)
     article_type3 = models.CharField(blank=True, max_length=10)
 
-    def __str__(self):
-        return self.article_title
+    w = models.FloatField(default = 0)#文章的权值
+
+    @property
+    def regist_time(self):#求出所差的时间(小时)
+        delta = django_tz.now() - self.article_time
+        return delta.days*24 + delta.seconds//3600
+
 
 
 class Comment(models.Model):
@@ -37,7 +40,7 @@ class Comment(models.Model):
     article_id = models.PositiveIntegerField()
     likes_num = models.PositiveIntegerField(default=0)
     comment_audio = models.FileField(blank=True)
-    comment_time = models.DateTimeField(default=timezone.now())
+    comment_time = models.DateTimeField(default=django_tz.now)
     comment_to = models.BooleanField(default=True)
     #评论是指向何方，article:1,comment:0
     class Meta:
