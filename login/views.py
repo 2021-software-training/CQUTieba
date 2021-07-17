@@ -23,9 +23,8 @@ def check_email_help(request):
 
 def register(request):
     print(1)
-    if request.method == "GET":
-        print(request.GET)
-        register_username = request.GET['username']
+    if request.method == "POST":
+        register_username = json.loads(request.body)['username']
 
         try:
             # 用户名已经存在
@@ -33,25 +32,25 @@ def register(request):
             return HttpResponse(json.dumps({"result": "not"}), content_type='application/json')
         except MyUser.DoesNotExist:
 
-            code = cache.get(request.GET["email"])
-            if code != request.GET["code"]:
+            code = cache.get(json.loads(request.body)["email"])
+            if code != json.loads(request.body)["code"]:
                 return JsonResponse({"result": "no"})
 
-            register_password = request.GET['password']
-            register_email = request.GET['email']
-            register_age = request.GET['age']
-            register_gender = request.GET['gender']
-            # register_sex = request.GET['sex']
+            register_password = json.loads(request.body)['password']
+            register_email = json.loads(request.body)['email']
+            register_age = json.loads(request.body)['age']
+            register_gender = json.loads(request.body)['gender']
+            # register_sex = json.loads(request.body)['sex']
             userinfo = {
                 "username": register_username,
                 "password": register_password,
                 "email": register_email,
-                "gender": register_gender
             }
+
             User.objects.create_user(**userinfo)
             user = User.objects.get(username=register_username)
             counter = NumCounter.objects.get(pk=1)
-            my_user = MyUser(user=user, age=register_age, my_user_id=counter.my_user_id)
+            my_user = MyUser(user=user, age=register_age, my_user_id=counter.my_user_id, gender=register_gender)
             counter.my_user_id += 1
             user.save()
             counter.save()
@@ -63,9 +62,10 @@ def register(request):
 
 
 def login(request):
-    if request.method == "GET":
-        username = request.GET['username']
-        password = request.GET['password']
+    if request.method == "POST":
+
+        username = json.loads(request.body)['username']
+        password = json.loads(request.body)['password']
 
         print("login_username: ", username, "\tlogin_password: ", password)
 
@@ -134,4 +134,7 @@ def user_judge(request):
         return JsonResponse({"result": "yes"})
 
 
-
+def test(request):
+    if request.method == 'POST':
+        print(json.loads(request.body))
+        return JsonResponse(data={"result": "yes"})

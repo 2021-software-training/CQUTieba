@@ -8,6 +8,7 @@ from mainpage.utils import user_authentication, get_user_name
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 import json
+from mainpage.utils import recommend_get_weight
 
 
 def add_article(request):
@@ -26,7 +27,6 @@ def add_article(request):
 
     username = res["username"]
     user = MyUser.objects.get(user__username=username)
-
     if request.method == "GET":
         counter = NumCounter.objects.get(pk=1)
         article = Article(
@@ -41,6 +41,7 @@ def add_article(request):
         )
         counter.my_article_id += 1
         article.save()
+        counter.save()
         return HttpResponse(json.dumps({"result": "yes"}), content_type='application/json')
     return HttpResponse(json.dumps({"result": "no"}), content_type='application/json')
 
@@ -124,8 +125,16 @@ def show_page_all_articles(request):
     if not res["result"]:
         return JsonResponse(data={"result": 0})
 
+    user = MyUser.objects.get(user__username=res["username"])
     articles_type = request.GET["type"]
-    if articles_type != "All":
+    if articles_type == "recommendation":
+        articles = []
+        temp = Article.objects.all()
+        for i in temp:
+            articles.append(i)
+        articles.sort(key=lambda x: recommend_get_weight(x, user), reverse=True)
+
+    elif articles_type != "All":
         articles_temp = Article.objects.filter(
             Q(article_type1=articles_type) | Q(article_type2=articles_type) | Q(article_type3=articles_type)
         )
@@ -139,10 +148,10 @@ def show_page_all_articles(request):
         temp['articleID'] = x.article_id
         temp['title'] = x.article_title
         temp['time'] = ("{:}年{:}月{:}日".format(
-                str(x.article_time.year),
-                str(x.article_time.month),
-                str(x.article_time.day)
-            ))
+            str(x.article_time.year),
+            str(x.article_time.month),
+            str(x.article_time.day)
+        ))
         temp['authorName'] = get_user_name(x)
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
@@ -179,10 +188,10 @@ def show_user_all_articles(request):
         temp['articleID'] = x.article_id
         temp['title'] = x.article_title
         temp['time'] = ("{:}年{:}月{:}日".format(
-                str(x.article_time.year),
-                str(x.article_time.month),
-                str(x.article_time.day)
-            ))
+            str(x.article_time.year),
+            str(x.article_time.month),
+            str(x.article_time.day)
+        ))
         temp['articleType1'] = x.article_type1
         temp['articleType2'] = x.article_type2
         temp['articleType3'] = x.article_type3
@@ -193,3 +202,26 @@ def show_user_all_articles(request):
         temp['likesNum'] = x.likes_num
         articles_data.append(temp)
     return JsonResponse(data=articles_data, safe=False)
+
+
+def delete_article(request):
+    """
+    删除指定文章
+    :param request:
+    :return:
+    """
+    res = user_authentication(request)
+    if not res["result"]:
+        return JsonResponse(data={"result": 0})
+
+    article_id = request.GET["articleID"]
+    article = Article.objects.get(pk=article_id)
+
+    user = MyUser.objects.get(user__username=res["username"])
+    if article.author_id != user.my_user_id:
+        return JsonResponse({"result": "no"})
+
+    comments = Comment.objects.filter(article_id=article_id)
+    comments.delete()
+    article.delete()
+    return JsonResponse({"result": "yes"})

@@ -1,3 +1,6 @@
+import datetime
+import random
+import math
 from mainpage.models import Article, Comment, LikeList
 from login.models import NumCounter, MyUser
 from django.db.models.query import QuerySet
@@ -43,3 +46,25 @@ def show_img(img_id):
     """
     image = Image.objects.get(id=img_id)
     return str(image.img.url)
+
+
+def recommend_get_weight(article: Article, user: MyUser):
+    res = 0.14*(0.001 * article.article_views) + 0.24*(1/15 * article.likes_num) + 0.62*article.comments_num
+    time_now = datetime.datetime.now()
+    time_edit = article.article_time
+    differ_time = 365*(time_now.year - time_edit.year) + 30*(time_now.month - time_edit.month) + (time_now.day-time_edit.day)
+
+    theta_low = 0.6
+    theta_high = 0.9
+    if user.habits1 == article.article_type1 or user.habits2 == article.article_type2 or user.habits3 == article.article_type3:
+        theta_low = 0.8
+        theta_high = 1.2
+    elif user.habits1 == article.article_type1 or user.habits2 == article.article_type2 or user.habits3 == article.article_type3:
+        theta_low = 0.8
+        theta_high = 1.2
+    elif user.habits1 == article.article_type1 or user.habits2 == article.article_type2 or user.habits3 == article.article_type3:
+        theta_low = 0.8
+        theta_high = 1.2
+    theta = random.uniform(theta_low, theta_high)
+
+    return (res * theta) / (math.log(differ_time + 1, 2) + 3)

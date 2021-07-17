@@ -26,5 +26,7 @@ urlpatterns = [
     path('getImage/<str:username>', views_other.get_image, name='get image'),
     path('getAudio/<audio_id>', views_audio.get_audio, name='get audio'),
     path('editAudio', views_audio.edit_audio, name='edit audio'),
-    path('getAudioInfo', views_audio.get_audio_info, name='get audio')
+    path('getAudioInfo', views_audio.get_audio_info, name='get audio'),
+
+    path('deleteArticle', views_article.delete_article, name='delete article')
 ]
